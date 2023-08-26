@@ -15,9 +15,9 @@ warnings.filterwarnings("ignore")
 
 parser = argparse.ArgumentParser('Plotting results from stan model.')
 parser.add_argument('--tasks', type=int, default=1, help="Number of times the model has been run in cluster.")
-parser.add_argument('--results_data', type=str, default='../../data/results_data/parametric/PIDR',
+parser.add_argument('--results_data', type=str, default='./data/results_data/parametric/PIDR/',
                     help="Folder for stan results storage.")
-parser.add_argument('--processed_data', type=str, default='../../data/processed_data/',
+parser.add_argument('--processed_data', type=str, default='./data/processed_data/',
                     help="Path to save processed data.")
 parser.add_argument('--period', type=str, default='operation',
                     help="Time period to be considered.")
@@ -103,8 +103,8 @@ def analyse_train_results(path, P, patients, df_sliced, trend_p, N, tasks=1):
             axs[0].set(ylabel="Glucose")
             axs[0].legend(loc='upper right')
 
-            axs[1].bar(df['t'], df['STARCH'] + df['SUGAR'], color='mediumpurple', width=0.3, label="Carbs")
-            axs[1].bar(df['t'], df['FAT'], bottom=df['STARCH'] + df['SUGAR'], color='cornflowerblue', width=0.3,
+            axs[1].bar(df['t'], df['CARBS'], color='mediumpurple', width=0.3, label="Carbs")
+            axs[1].bar(df['t'], df['FAT'], bottom=df['CARBS'], color='cornflowerblue', width=0.3,
                        label='Fat')
             axs[1].set(xlabel="Time (hours)", ylabel="Stacked meals")
             axs[1].legend()
@@ -112,7 +112,7 @@ def analyse_train_results(path, P, patients, df_sliced, trend_p, N, tasks=1):
             patient_id = patient_id.partition('_')[0]
             if not os.path.exists(path + 'id' + patient_id + '/'):
                 os.makedirs(path + 'id' + patient_id + '/')
-            plt.savefig(path + 'id' + patient_id + '/predictions_train_task' + str(t) + '.jpg')
+            plt.savefig(path + 'id' + patient_id + '/predictions_train_task' + str(t) + '.pdf')
 
     metrics_train = pd.DataFrame.from_dict(metrics_train, orient='index')
     metrics_train['mean'] = metrics_train.mean(axis=1)
@@ -364,8 +364,8 @@ def analyse_test_results(path, P, patients, df_sliced_test, trend_p, N_test, M_t
                              weight='bold')
             axs[0].legend(loc='upper right')
 
-            axs[1].bar(df['t'], df['STARCH'] + df['SUGAR'], color='darkmagenta', width=0.3, label="Carbs")
-            axs[1].bar(df['t'], df['FAT'], bottom=df['STARCH'] + df['SUGAR'], color='orange', width=0.3, label='Fat')
+            axs[1].bar(df['t'], df['CARBS'], color='darkmagenta', width=0.3, label="Carbs")
+            axs[1].bar(df['t'], df['FAT'], bottom=df['CARBS'], color='orange', width=0.3, label='Fat')
             axs[1].set(xlabel="Time (hours)", ylabel="Stacked meals (g)")
             axs[1].set_title('True meals, eaten after operation.', weight='bold')
             axs[1].set_axisbelow(True)
@@ -374,8 +374,7 @@ def analyse_test_results(path, P, patients, df_sliced_test, trend_p, N_test, M_t
 
             patient_id = patient_id.partition('_')[0]
             plt.subplots_adjust(top=0.93)
-            plt.savefig(path + 'id' + patient_id + '/predictions_test_task' + str(t) + '.jpg')
-            plt.savefig(path + 'id' + patient_id + '/Fig10.tiff')
+            plt.savefig(path + 'id' + patient_id + '/predictions_test_task' + str(t) + '.pdf')
 
     metrics_test = pd.DataFrame.from_dict(metrics_test, orient='index')
     metrics_test['mean'] = metrics_test.mean(axis=1)
@@ -493,9 +492,10 @@ if __name__ == "__main__":
     })
 
     args = parser.parse_args()
+    os.chdir("../../../")
 
     # Downloading processed data
-    path_processed = args.processed_data + args.period + '/'
+    path_processed = args.processed_data
     patients = np.loadtxt(path_processed + 'patients.txt', dtype=str)
     P = len(patients)
     trend_p = np.loadtxt(path_processed + 'trend_p.txt')
