@@ -1,6 +1,7 @@
 .idea/
 venv/
 data/data_original/
+data/raw_data/
 ./src/utils/__pycache__/
 triton_outputs_parametric/
 .DS_Store
