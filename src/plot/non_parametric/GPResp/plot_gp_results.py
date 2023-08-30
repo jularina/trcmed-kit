@@ -46,14 +46,13 @@ def plot_predictions(data, args, ids, f_means, f_vars, metrics, time='train', pl
         M1 = np.var(f_means_i[0]) / np.var(y[i])
         M2 = np.var(f_means_i[3]) / np.var(y[i]) - M1
         M5 = abs(np.var(np.array(f_means_i[1]) + np.array(f_means_i[2])) - np.var(y[i]))
+        nll = -glucose_len/2 * math.log(2*math.pi) - glucose_len * math.log(1)
 
         # Appending metrics to the metrics dictionary
         metrics['RMSE'].append(rmse)
-        metrics['M1'].append(rmse)
         metrics['M2'].append(M2)
-        metrics['M5'].append(M5)
         metrics['MAE'].append(mae_score)
-        metrics['R2'].append(r2)
+        metrics['NLL'].append(nll)
 
         plot_patient_predictions(ids[i], rmse, x[i], y[i], meals[i], f_means_i, f_vars_i,
                                  ['Baseline', 'Carbs', 'Fat', 'Fitted glucose'],

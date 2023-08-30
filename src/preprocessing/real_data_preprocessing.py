@@ -1,15 +1,10 @@
 import os
-
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
-from sklearn.metrics import mean_squared_error
-from scipy import stats
-import math
 import msoffcrypto
 import io
 from glob import glob
-import re
 import argparse
 
 # !pip install msoffcrypto-tool
@@ -19,7 +14,7 @@ parser = argparse.ArgumentParser('Preprocessing initial data for stan model.')
 parser.add_argument('--period', type=str, default='operation',
                     help="Time period to be considered.")
 parser.add_argument('--patient_data', type=str,
-                    default='../../data/data_original/data_files/Libredata_16042020_password_protected'
+                    default='../../data/raw_data/data_files/Libredata_16042020_password_protected'
                             '.xlsx',
                     help="Path to patient data.")
 parser.add_argument('--meals_data', type=str, default='../../data/raw_data/data_files'
@@ -130,7 +125,7 @@ def read_glucose_patient_df(patient_id, glucose_data, period='operation'):
     df_patient_glucose.columns = ["Time", "Appointment type", "y1", "y"]
     df_patient_glucose["y"] = df_patient_glucose["y"].fillna(0.0) + df_patient_glucose["y1"].fillna(0.0)
     df_patient_glucose.drop(["y1"], inplace=True, axis=1)
-    df_patient_glucose[['Date', 'Time']] = df_patient_glucose['Time'].str.split(' ', 1, expand=True)
+    df_patient_glucose[['Date', 'Time']] = df_patient_glucose['Time'].str.split(pat=' ', n=1, expand=True)
 
     # Filter df_patient_glucose, select useful column
     df_patient_glucose = df_patient_glucose[df_patient_glucose['Time'].notnull()]

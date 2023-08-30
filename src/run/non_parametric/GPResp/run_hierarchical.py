@@ -14,17 +14,17 @@ import gpflow as gpf
 warnings.filterwarnings("ignore")
 
 parser = argparse.ArgumentParser('Running hierarchical GP model.')
-parser.add_argument('--processed_data', type=str, default='./data/processed_data/',
+parser.add_argument('--processed_data', type=str, default='./data/synthetic/processed_data/',
                     help="Path to save processed data.")
-parser.add_argument('--results_data', type=str, default='./data/results_data/non_parametric/GPResp/',
+parser.add_argument('--results_data', type=str, default='./data/synthetic/results_data/non_parametric/GPResp/',
                     help="Path to save results data.")
-parser.add_argument('--results_data_meal', type=str, default='./data/results_data/non_parametric/GPResp/single_meal/',
+parser.add_argument('--results_data_meal', type=str, default='./data/synthetic/results_data/non_parametric/GPResp/single_meal/',
                     help="Path to save results data.")
 parser.add_argument('--treatment_effect_time', type=int, default=3.0,
                     help="Time of the effect of each treatment.")
 parser.add_argument('--period', type=str, default='operation',
                     help="Period, with which we work.")
-parser.add_argument('--results_parametric_data', type=str, default='./data/results_data/parametric/',
+parser.add_argument('--results_parametric_data', type=str, default='./data/synthetic/results_data/parametric/',
                     help="Path to save results of parametric modelling.")
 
 
@@ -55,11 +55,11 @@ def modelling(df_train, df_test, args):
     model = train(model)
 
     # Predict for training data and receive metrics
-    metrics_train = {'RMSE': [], 'M1': [], 'M2': [], 'M5': [], "MAE" : [], "R2":[]}
+    metrics_train = {'RMSE': [], 'M2': [], "MAE" : [], "NLL":[]}
     metrics_train = predict(model, args, ids, metrics_train, data=(x, y, meals), time='train')
 
     # Predict for testing data and receive metrics
-    metrics_test = {'RMSE': [], 'M1': [], 'M2': [], 'M5': [], "MAE" : [], "R2":[]}
+    metrics_test = {'RMSE': [], 'M2': [], "MAE" : [], "NLL":[]}
     metrics_test = predict(model, args, ids, metrics_test, data=(x_test, y_test, meals_test), time='test')
 
     # Save the result metrics

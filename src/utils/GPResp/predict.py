@@ -26,15 +26,9 @@ def predict(model, args, ids, metrics, data, time):
     # Calculate meals mean and covariance
     ft_mean_meal1, ft_mean_meal2, ft_var_meal1, ft_var_meal2 = model.predict_train(x, meals, patients_meals_idx,
                                                                                    time=time)
-    # ft_var_meal1, ft_var_meal2 = tf.squeeze(ft_var_meal1), tf.squeeze(ft_var_meal2)
-    # ft_var_meal1, ft_var_meal2 = tf.linalg.diag_part(ft_var_meal1), tf.linalg.diag_part(ft_var_meal2)
-    # ft_var_meal1, ft_var_meal2 = tf.reshape(ft_var_meal1, (-1,1)), tf.reshape(ft_var_meal2, (-1,1))
 
     # Calculate baseline mean and covariance
     fb_mean, fb_var = model.predict_baseline(x, time=time)
-    # fb_var = tf.squeeze(fb_var)
-    # fb_var = tf.linalg.diag_part(fb_var)
-    # fb_var = tf.reshape(fb_var, (-1,1))
 
     # Combine baseline and meals predictions
     f_mean, f_var = ft_mean_meal1 + ft_mean_meal2 + fb_mean, ft_var_meal1 + ft_var_meal2 + fb_var
@@ -68,15 +62,9 @@ def predict_meal(model, args, ids, metrics, data, time, order):
 
     # Calculate meals mean and covariance
     ft_mean_meal1, ft_mean_meal2, ft_var_meal1, ft_var_meal2 = model.predict_train(x, meals, patients_meals_idx)
-    # ft_var_meal1, ft_var_meal2 = tf.squeeze(ft_var_meal1), tf.squeeze(ft_var_meal2)
-    # ft_var_meal1, ft_var_meal2 = tf.linalg.diag_part(ft_var_meal1), tf.linalg.diag_part(ft_var_meal2)
-    # ft_var_meal1, ft_var_meal2 = tf.reshape(ft_var_meal1, (-1,1)), tf.reshape(ft_var_meal2, (-1,1))
 
     # Calculate baseline mean and covariance
     fb_mean, fb_var = model.predict_baseline(x)
-    # fb_var = tf.squeeze(fb_var)
-    # fb_var = tf.linalg.diag_part(fb_var)
-    # fb_var = tf.reshape(fb_var, (-1,1))
 
     # Combine baseline and meals predictions
     f_mean, f_var = ft_mean_meal1 + ft_mean_meal2 + fb_mean, ft_var_meal1 + ft_var_meal2 + fb_var
