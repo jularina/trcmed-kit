@@ -30,10 +30,12 @@ def predict(model, args, ids, metrics, data, time):
 
     # Combine baseline and meals predictions
     f_mean, f_var = ft_mean_meal1 + ft_mean_meal2 + fb_mean, ft_var_meal1 + ft_var_meal2 + fb_var
-    #f_mean, f_var = ft_mean_meal1 + fb_mean, ft_var_meal1 + fb_var
+
+    # Extract learnt variances
+    vars_learnt = [model.likelihood[i].variance.numpy().item() for i in range(P)]
 
     # Plot results
-    metrics = plot_predictions(data, args, ids, [fb_mean, ft_mean_meal1, ft_mean_meal2, f_mean], [fb_var, ft_var_meal1, ft_var_meal2, f_var], metrics, time=time)
+    metrics = plot_predictions(data, args, ids, [fb_mean, ft_mean_meal1, ft_mean_meal2, f_mean], [fb_var, ft_var_meal1, ft_var_meal2, f_var], metrics, vars_learnt=vars_learnt, time=time)
 
     # Work with latent modeling
     ft_lfmean_meal1, ft_lfmean_meal2, ft_lfvar_meal1, ft_lfvar_meal2, ft_mean_meal1, ft_mean_meal2, ft_var_meal1, ft_var_meal2 = model.predict_latent_mean_and_variance(x, meals, patients_meals_idx)

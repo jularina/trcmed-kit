@@ -31,9 +31,12 @@ def predict(model, args, ids, metrics, data, time):
     # Combine baseline and meals predictions
     f_mean, f_var = ft_mean_meal1 + fb_mean, ft_var_meal1 + fb_var
 
+    # Extract learnt variances
+    vars_learnt = [model.likelihood[i].variance.numpy().item() for i in range(P)]
+
     # Plot results
     metrics = plot_predictions(data, args, ids, [fb_mean, ft_mean_meal1, f_mean],
-                               [fb_var, ft_var_meal1, f_var], metrics, time=time)
+                               [fb_var, ft_var_meal1, f_var], metrics, vars_learnt=vars_learnt, time=time)
 
     return metrics
 

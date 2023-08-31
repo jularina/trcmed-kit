@@ -53,7 +53,7 @@ def remove_treatment_wo_effect(x, meals):
     return meals
 
 
-def times_correction(df, df_corr, period, df_test=None, args=None):
+def times_correction(df, df_corr, df_test=None, args=None):
     t_corr = df_corr.values.ravel('C')
     t_corr = [i for i in t_corr if i != 0]
 
@@ -70,9 +70,9 @@ def times_correction(df, df_corr, period, df_test=None, args=None):
 
     else:
         # Train and test
-        # Preapre train and test corrections
-        M = np.loadtxt(args.processed_data + period + '/M.txt', dtype='int')
-        M_test = np.loadtxt(args.processed_data + period + '/M_test.txt', dtype='int')
+        # Prepare train and test corrections
+        M = np.loadtxt(args.processed_data + '/M.txt', dtype='int')
+        M_test = np.loadtxt(args.processed_data + '/M_test.txt', dtype='int')
         P = len(M)
         t_corr_train, t_corr_test = [], []
 

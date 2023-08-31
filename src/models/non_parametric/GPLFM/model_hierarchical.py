@@ -269,7 +269,7 @@ class HierarchicalModel(gpf.models.GPR):
             patients_indices_len = [tf.shape(xi)[0] for i, xi in enumerate(x)]
             patients_idx_meal = tf.repeat(patients_indices, patients_indices_len)
             mask_boolean_meal = tf.math.equal(patients_idx_meal, 2)
-            plot_baseline_kernel_train(Ksum, mask_boolean_meal)
+            #plot_baseline_kernel_train(Ksum, mask_boolean_meal)
 
         if len(self.meals_sep) > 0:
             # Calculate treatment kernel
@@ -287,7 +287,7 @@ class HierarchicalModel(gpf.models.GPR):
                     patient_meals_idx_meal1 = self.treatment_kernel_cor_meal1.m_pidx
                     patients_idx_meal1 = tf.gather(patient_meals_idx_meal1, d_idx)
                     mask_boolean_meal1 = tf.math.equal(patients_idx_meal1, 2)
-                    plot_total_kernel_whole_train(B_meal1, tlse_meal1, B_meal2, tlse_meal2, Kt, Kb, Ksum, mask_boolean_meal1, mask_boolean_meal)
+                    #plot_total_kernel_whole_train(B_meal1, tlse_meal1, B_meal2, tlse_meal2, Kt, Kb, Ksum, mask_boolean_meal1, mask_boolean_meal)
 
                 return Ksum
 
@@ -393,7 +393,7 @@ class HierarchicalModel(gpf.models.GPR):
         if time == 'test':
             kernel_base_plot = self.baseline_kernels[2]
             Kb = kernel_base_plot(x_list[2], full_cov=False)
-            plot_total_kernel_whole_test(Kt_meal1, Kt_meal2, Kb, mask_boolean_meal1, mask_boolean_meal2)
+            #plot_total_kernel_whole_test(Kt_meal1, Kt_meal2, Kb, mask_boolean_meal1, mask_boolean_meal2)
 
         return K_scatter_diag_meal1, K_scatter_diag_meal2
 

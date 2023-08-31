@@ -8,7 +8,7 @@ import math
 import matplotlib as mpl
 
 
-def plot_predictions(data, args, ids, f_means, f_vars, metrics, time='train', plot_var=True):
+def plot_predictions(data, args, ids, f_means, f_vars, metrics, vars_learnt, time='train', plot_var=True):
     """ Plot predictions for the whole data.
     Parameters:
     data (tuple): tuple of lists of glucose times, glucose values, meals times and values
@@ -45,15 +45,14 @@ def plot_predictions(data, args, ids, f_means, f_vars, metrics, time='train', pl
         r2 = r2_score(y[i], f_means_i[3])
         M1 = np.var(f_means_i[0]) / np.var(y[i])
         M2 = np.var(f_means_i[3]) / np.var(y[i]) - M1
-        M5 = abs(np.var(np.array(f_means_i[1]) + np.array(f_means_i[2])) - np.var(y[i]))
+        nll = 0.5 * (np.log(2.0 * np.pi) + np.log(vars_learnt[i]) + ((y[i] - f_means_i[3])**2) / vars_learnt[i])
+        nll = np.mean(nll)
 
         # Appending metrics to the metrics dictionary
         metrics['RMSE'].append(rmse)
-        metrics['M1'].append(rmse)
         metrics['M2'].append(M2)
-        metrics['M5'].append(M5)
         metrics['MAE'].append(mae_score)
-        metrics['R2'].append(r2)
+        metrics['NLL'].append(nll)
 
         plot_patient_predictions(ids[i], rmse, x[i], y[i], meals[i], f_means_i, f_vars_i,
                                  ['baseline', 'response to carbs', 'response to fat', 'Fitted glucose'],

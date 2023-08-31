@@ -75,8 +75,8 @@ def times_correction(df, df_corr, df_test=None, args=None):
     else:
         # Train and test
         # Preapre train and test corrections
-        M = np.loadtxt(args.processed_data + args.period + '/M.txt', dtype='int')
-        M_test = np.loadtxt(args.processed_data + args.period + '/M_test.txt', dtype='int')
+        M = np.loadtxt(args.processed_data + '/M.txt', dtype='int')
+        M_test = np.loadtxt(args.processed_data + '/M_test.txt', dtype='int')
         P = len(M)
         t_corr_train, t_corr_test = [], []
 

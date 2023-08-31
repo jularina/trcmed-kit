@@ -8,7 +8,7 @@ import math
 import matplotlib as mpl
 
 
-def plot_predictions(data, args, ids, f_means, f_vars, metrics, time='train', plot_var=True):
+def plot_predictions(data, args, ids, f_means, f_vars, metrics, vars_learnt, time='train', plot_var=True):
     """ Plot predictions for the whole data.
 
     Parameters:
@@ -46,7 +46,8 @@ def plot_predictions(data, args, ids, f_means, f_vars, metrics, time='train', pl
         M1 = np.var(f_means_i[0]) / np.var(y[i])
         M2 = np.var(f_means_i[3]) / np.var(y[i]) - M1
         M5 = abs(np.var(np.array(f_means_i[1]) + np.array(f_means_i[2])) - np.var(y[i]))
-        nll = -glucose_len/2 * math.log(2*math.pi) - glucose_len * math.log(1)
+        nll = 0.5 * (np.log(2.0 * np.pi) + np.log(vars_learnt[i]) + ((y[i] - f_means_i[3])**2) / vars_learnt[i])
+        nll = np.mean(nll)
 
         # Appending metrics to the metrics dictionary
         metrics['RMSE'].append(rmse)

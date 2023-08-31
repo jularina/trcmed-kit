@@ -13,19 +13,23 @@ import os
 warnings.filterwarnings("ignore")
 
 parser = argparse.ArgumentParser('Running hierarchical GP model.')
-parser.add_argument('--processed_data', type=str, default='./data/processed_data/',
+parser.add_argument('--processed_data', type=str, default='./data/real/processed_data/',
                     help="Path to save processed data.")
-parser.add_argument('--results_data', type=str, default='./data/results_data/non_parametric/GPConv/',
+parser.add_argument('--results_data', type=str, default='./data/real/results_data/non_parametric/GPConv/',
                     help="Path to save results data.")
 parser.add_argument('--treatment_effect_time', type=int, default=3.0,
                     help="Time of the effect of each treatment.")
 parser.add_argument('--period', type=str, default='operation',
                     help="Period, with which we work.")
-parser.add_argument('--results_parametric_data', type=str, default='./data/results_data/parametric/',
+parser.add_argument('--data', type=str, default='real',
+                    help="Data type.")
+parser.add_argument('--noise_var', type=float, default=1.0,
+                    help="Noise variance for the model.")
+parser.add_argument('--results_parametric_data', type=str, default='./data/real/results_data/parametric/PIDR/',
                     help="Path to save results of parametric modelling.")
 parser.add_argument('--meal_type', type=str, default='carbs',
                     help="Type of meal.")
-parser.add_argument('--results_data_meal', type=str, default='./data/results_data/non_parametric/GPConv/single_meal/',
+parser.add_argument('--results_data_meal', type=str, default='./data/real/results_data/non_parametric/GPConv/single_meal/',
                     help="Path to save results data.")
 
 def modelling(df_train, df_test, args):
@@ -47,7 +51,7 @@ def modelling(df_train, df_test, args):
                               baseline_kernels=[get_baseline_kernel() for _ in range(P)],
                               mean_functions=[gpf.mean_functions.Zero()
                                               for _ in range(P)],
-                              noise_variance=1.0,
+                              noise_variance=args.noise_var,
                               separating_interval=200,
                               train_noise=True)
 
@@ -65,11 +69,11 @@ def modelling(df_train, df_test, args):
     #model_wo_meal = train(model_wo_meal)
 
     # # Predict for training data and receive metrics
-    metrics_train = {'RMSE': [], 'M1': [], 'M2': [], 'M5': [], "MAE" : [], "R2":[]}
+    metrics_train = {'RMSE': [], 'M2': [], "MAE" : [], "NLL":[]}
     metrics_train = predict(model_full, args, ids, metrics_train, data=(x,y,meals), time='train')
 
     # # Predict for testing data and receive metrics
-    metrics_test = {'RMSE': [], 'M1': [], 'M2': [], 'M5': [], "MAE" : [], "R2":[]}
+    metrics_test = {'RMSE': [], 'M2': [], "MAE" : [], "NLL":[]}
     metrics_test = predict(model_full, args, ids, metrics_test, data=(x_test, y_test, meals_test), time='test')
 
     # Save the result metrics
@@ -120,6 +124,20 @@ if __name__ == "__main__":
     # Downloading processed data
     df_train = pd.read_csv(args.processed_data + '/df_sliced.csv')
     df_test = pd.read_csv(args.processed_data + '/df_sliced_test.csv')
+
+    if args.data == 'real':
+        # For real data make time corrections, based on learnt parametric models
+        time_corr_df = pd.read_csv(
+            args.results_parametric_data + 'time_corrections_train_test.csv',
+            index_col=None)
+        df_train, df_test = times_correction(df_train, time_corr_df, df_test, args)
+
+        # Select ids
+        ids = ['31_2', '12_2', '32_2', '46_2', '29_2', '57_2', '23_2', '9_2', '28_2', '76_1', '65_1', '60_1']
+        # ids = ['46_2','12_2','23_2','29_2','28_2']
+        # ids = ['12_2', '29_2', '28_2']
+        df_train = df_train[df_train['id'].isin(ids)]
+        df_test = df_test[df_test['id'].isin(ids)]
 
     # Modelling (Train hierarchical GP model and make predictions on glucose data)
     modelling(df_train, df_test, args)
