@@ -15,9 +15,9 @@ warnings.filterwarnings("ignore")
 
 parser = argparse.ArgumentParser('Plotting results from stan model.')
 parser.add_argument('--tasks', type=int, default=1, help="Number of times the model has been run in cluster.")
-parser.add_argument('--results_data', type=str, default='./data/results_data/parametric/PResp/',
+parser.add_argument('--results_data', type=str, default='./data/real/results_data/parametric/PResp/',
                     help="Folder for stan results storage.")
-parser.add_argument('--processed_data', type=str, default='./data/processed_data/',
+parser.add_argument('--processed_data', type=str, default='./data/real/processed_data/',
                     help="Path to save processed data.")
 parser.add_argument('--period', type=str, default='operation',
                     help="Time period to be considered.")
@@ -124,58 +124,6 @@ def analyse_train_results(path, P, patients, df_sliced, trend_p, N, tasks=1):
     return metrics_train, rmse_conf_int
 
 
-def model1_test_results(fitted_params_patients, N_max_test, M_max_test, tx_test, t_test, x1_test, x2_test):
-    """Combining model1 results from fitting testing data to stan model.
-
-    Parameters:
-    fitted_params_patients (pd.Dataframe): Dataframe with fitted stan parameters for each patiemt
-    N_max_test (int): maximum number of glucose observations
-    M_max_test (int): maximum number of meals
-    tx_test (np.ndarray): Numpy array with true meals times for each patient
-    t_test (np.ndarray): Numpy array with observed meals times for each patient
-    x1_test (np.ndarray): Numpy array with 1st meal values for each patient at each time
-    x2_test (np.ndarray): Numpy array with 2nd meal values for each patient at each time
-
-    Returns:
-    samples_y_test (pd.Dataframe): Dataframe with sampling results for combined response
-    samples_y1_test (pd.Dataframe): Dataframe with sampling results for 1st meal
-    samples_y2_test (pd.Dataframe): Dataframe with sampling results for 2nd meal
-   """
-    alpha_p = fitted_params_patients.iloc[:, 0]
-    beta1_p = fitted_params_patients.iloc[:, 1]
-    beta2_p = fitted_params_patients.iloc[:, 2]
-    Mcumsum_test = np.cumsum(M_test)
-    Mcumsum_test = np.insert(Mcumsum_test, 0, 0)
-
-    resp1, resp2, resp = np.zeros((P, N_max_test, M_max_test)), np.zeros((P, N_max_test, M_max_test)), np.zeros(
-        (P, N_max_test, M_max_test))
-    samples_y_test = np.zeros((P, N_max_test))
-    samples_y1_test = np.zeros((P, N_max_test))
-    samples_y2_test = np.zeros((P, N_max_test))
-
-    for p in range(P):
-        for n in range(N_test[p]):
-            for m in range(M_test[p]):
-                if abs((tx_test[Mcumsum_test[p] + m] - t_test[p, n]) < 250):
-                    resp1[p, n, m] = (x1_test[Mcumsum_test[p] + m] * beta1_p[p]) * np.exp(
-                        -0.5 * (t_test[p, n] - tx_test[Mcumsum_test[p] + m] - 3 * (alpha_p[p])) ** 2 / (
-                            alpha_p[p]) ** 2)
-                    resp2[p, n, m] = (x2_test[Mcumsum_test[p] + m] * beta2_p[p]) * np.exp(
-                        -0.5 * (t_test[p, n] - tx_test[Mcumsum_test[p] + m] - 3 * (alpha_p[p])) ** 2 / (
-                            alpha_p[p]) ** 2)
-                    resp[p, n, m] = resp1[p, n, m] + resp2[p, n, m]
-
-            samples_y_test[p, n] = sum(resp[p, n,]) + trend_p[p]
-            samples_y1_test[p, n] = sum(resp1[p, n,])
-            samples_y2_test[p, n] = sum(resp2[p, n,])
-
-    samples_y_test = pd.DataFrame(samples_y_test)
-    samples_y1_test = pd.DataFrame(samples_y1_test)
-    samples_y2_test = pd.DataFrame(samples_y2_test)
-
-    return samples_y_test, samples_y1_test, samples_y2_test
-
-
 def model2_test_results(fitted_params_patients, N_max_test, M_max_test, tx_test, t_test, x1_test, x2_test):
     """Combining model2 results from fitting testing data to stan model.
 
@@ -229,60 +177,6 @@ def model2_test_results(fitted_params_patients, N_max_test, M_max_test, tx_test,
     return samples_y_test, samples_y1_test, samples_y2_test
 
 
-def model3_test_results(fitted_params_patients, N_max_test, M_max_test, tx_test, t_test, x1_test, x2_test):
-    """Combining model3 results from fitting testing data to stan model.
-
-    Parameters:
-    fitted_params_patients (pd.Dataframe): Dataframe with fitted stan parameters for each patiemt
-    N_max_test (int): maximum number of glucose observations
-    M_max_test (int): maximum number of meals
-    tx_test (np.ndarray): Numpy array with true meals times for each patient
-    t_test (np.ndarray): Numpy array with observed meals times for each patient
-    x1_test (np.ndarray): Numpy array with 1st meal values for each patient at each time
-    x2_test (np.ndarray): Numpy array with 2nd meal values for each patient at each time
-
-    Returns:
-    samples_y_test (pd.Dataframe): Dataframe with sampling results for combined response
-    samples_y1_test (pd.Dataframe): Dataframe with sampling results for 1st meal
-    samples_y2_test (pd.Dataframe): Dataframe with sampling results for 2nd meal
-   """
-    alpha1_p = fitted_params_patients.iloc[:, 0]
-    coeff_alpha2_p = fitted_params_patients.iloc[:, 1]
-    alpha2_p = alpha1_p * coeff_alpha2_p
-    beta1_p = fitted_params_patients.iloc[:, 2]
-    beta2_p = fitted_params_patients.iloc[:, 3]
-    Mcumsum_test = np.cumsum(M_test)
-    Mcumsum_test = np.insert(Mcumsum_test, 0, 0)
-
-    resp1, resp2, resp = np.zeros((P, N_max_test, M_max_test)), np.zeros((P, N_max_test, M_max_test)), np.zeros(
-        (P, N_max_test, M_max_test))
-    samples_y_test = np.zeros((P, N_max_test))
-    samples_y1_test = np.zeros((P, N_max_test))
-    samples_y2_test = np.zeros((P, N_max_test))
-
-    for p in range(P):
-        for n in range(N_test[p]):
-            for m in range(M_test[p]):
-                if abs((tx_test[Mcumsum_test[p] + m] - t_test[p, n]) < 250):
-                    resp1[p, n, m] = (x1_test[Mcumsum_test[p] + m] * beta1_p[p]) * np.exp(
-                        -0.5 * (t_test[p, n] - tx_test[Mcumsum_test[p] + m] - 3 * (alpha1_p[p])) ** 2 / (
-                            alpha1_p[p]) ** 2)
-                    resp2[p, n, m] = (x2_test[Mcumsum_test[p] + m] * beta2_p[p]) * np.exp(
-                        -0.5 * (t_test[p, n] - tx_test[Mcumsum_test[p] + m] - 3 * (alpha2_p[p])) ** 2 / (
-                            alpha2_p[p]) ** 2)
-                    resp[p, n, m] = resp1[p, n, m] + resp2[p, n, m]
-
-            samples_y_test[p, n] = sum(resp[p, n,]) + trend_p[p]
-            samples_y1_test[p, n] = sum(resp1[p, n,])
-            samples_y2_test[p, n] = sum(resp2[p, n,])
-
-    samples_y_test = pd.DataFrame(samples_y_test)
-    samples_y1_test = pd.DataFrame(samples_y1_test)
-    samples_y2_test = pd.DataFrame(samples_y2_test)
-
-    return samples_y_test, samples_y1_test, samples_y2_test
-
-
 def analyse_test_results(path, P, patients, df_sliced_test, trend_p, N_test, M_test, model, tasks=1):
     """Analyse and plot results from fitting testing data to stan model.
 
@@ -300,23 +194,23 @@ def analyse_test_results(path, P, patients, df_sliced_test, trend_p, N_test, M_t
     Returns:
     metrics_test (dict): Dictionary to store testing metrics
    """
-    metrics_test = {'RMSE': [], 'M2': [], 'M5': [], "MAE" : [], "R2":[]}
+    metrics_test = {'RMSE': [], 'M2': [], "MAE" : [], "NLL":[]}
     N_max_test, M_max_test = max(N_test), max(M_test)
 
     for t in range(tasks):
         fitted_params_patients = pd.read_csv(path + 'fitted_params_patients_' + str(t) + '.csv')
-        if model == 1:
-            samples_y_test, samples_y1_test, samples_y2_test = model1_test_results(fitted_params_patients, N_max_test,
-                                                                                   M_max_test, tx_test, t_test, x1_test,
-                                                                                   x2_test)
-        elif model == 2:
+        # if model == 1:
+        #     samples_y_test, samples_y1_test, samples_y2_test = model1_test_results(fitted_params_patients, N_max_test,
+        #                                                                            M_max_test, tx_test, t_test, x1_test,
+        #                                                                            x2_test)
+        if model == 2:
             samples_y_test, samples_y1_test, samples_y2_test = model2_test_results(fitted_params_patients, N_max_test,
                                                                                    M_max_test, tx_test, t_test, x1_test,
                                                                                    x2_test)
-        elif model == 3 or model == 4:
-            samples_y_test, samples_y1_test, samples_y2_test = model3_test_results(fitted_params_patients, N_max_test,
-                                                                                   M_max_test, tx_test, t_test, x1_test,
-                                                                                   x2_test)
+        # elif model == 3 or model == 4:
+        #     samples_y_test, samples_y1_test, samples_y2_test = model3_test_results(fitted_params_patients, N_max_test,
+        #                                                                            M_max_test, tx_test, t_test, x1_test,
+        #                                                                            x2_test)
 
         for idx in range(P):
             patient_id = patients[idx]
@@ -337,6 +231,8 @@ def analyse_test_results(path, P, patients, df_sliced_test, trend_p, N_test, M_t
             M1 = np.var(trend) / np.var(df_ys['y'])
             M2 = np.var(overall_glucose) / np.var(df_ys['y']) - M1
             M5 = abs(np.var(np.array(meals1) + np.array(meals2)) - np.var(df_ys['y']))
+            nll = 0.5 * (np.log(2.0 * np.pi) + np.log(0.58) + ((np.array(overall_glucose) - df_ys['y']) ** 2) / 0.58)
+            nll = np.mean(nll)
 
             # Confidence interval
             n = len(df_ys['y'])
@@ -346,9 +242,8 @@ def analyse_test_results(path, P, patients, df_sliced_test, trend_p, N_test, M_t
             # Appending metrics to the metrics dictionary
             metrics_test['RMSE'].append(rmse)
             metrics_test['M2'].append(M2)
-            metrics_test['M5'].append(M5)
             metrics_test['MAE'].append(mae_score)
-            metrics_test['R2'].append(r2)
+            metrics_test['NLL'].append(nll)
 
             # Plotting
             fig, axs = plt.subplots(2, 1, figsize=(5.2, 4.0), dpi=300, sharex=True)
