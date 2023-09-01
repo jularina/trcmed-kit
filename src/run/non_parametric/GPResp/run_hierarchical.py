@@ -3,13 +3,13 @@ import numpy as np
 import pandas as pd
 import argparse
 import warnings
-from src.utils.GPResp.data_preparation import arrays_preparation, times_correction, create_meal_prediction
+from src.utils.GPResp.data_preparation import arrays_preparation, times_correction, create_meal_prediction, \
+    patients_data_arrays, patients_data_arrays_onemeal
 from src.utils.GPResp.predict import predict, predict_meal, predict_meal_severalsetups
 from src.models.non_parametric.GPResp.model_hierarchical import HierarchicalModel
 from src.models.non_parametric.GPResp.kernels import get_baseline_kernel, get_treatment_time_meal1_kernel, \
     get_treatment_time_meal2_kernel, get_treatment_time_meal1_kernel_lfm, get_treatment_time_meal2_kernel_lfm
 import gpflow as gpf
-
 
 warnings.filterwarnings("ignore")
 
@@ -18,7 +18,8 @@ parser.add_argument('--processed_data', type=str, default='./data/real/processed
                     help="Path to save processed data.")
 parser.add_argument('--results_data', type=str, default='./data/real/results_data/non_parametric/GPResp/',
                     help="Path to save results data.")
-parser.add_argument('--results_data_meal', type=str, default='./data/real/results_data/non_parametric/GPResp/single_meal/',
+parser.add_argument('--results_data_meal', type=str,
+                    default='./data/real/results_data/non_parametric/GPResp/single_meal/',
                     help="Path to save results data.")
 parser.add_argument('--treatment_effect_time', type=int, default=3.0,
                     help="Time of the effect of each treatment.")
@@ -30,7 +31,10 @@ parser.add_argument('--noise_var', type=float, default=1.0,
                     help="Noise variance for the model.")
 parser.add_argument('--results_parametric_data', type=str, default='./data/real/results_data/parametric/PIDR/',
                     help="Path to save results of parametric modelling.")
-
+parser.add_argument('--original_arrays_path', type=str, default='./data/real/processed_data/patients_arrays/',
+                    help="Path to numpy arrays with patients data.")
+parser.add_argument('--created_arrays_path', type=str, default='./data/real/results_data/non_parametric/GPResp/patients_arrays/',
+                    help="Path to numpy arrays with patients data.")
 
 def modelling(df_train, df_test, args):
     """General function for creation of model, making predictions.
@@ -43,6 +47,9 @@ def modelling(df_train, df_test, args):
     x, y, meals, patients, P = arrays_preparation(df_train)
     ids = [id.partition('_')[0] for id in patients]
     x_test, y_test, meals_test, _, _ = arrays_preparation(df_test)
+
+    if args.data == 'real':
+        patients_data_arrays(x, y, meals, x_test, y_test, meals_test, ids, args.original_arrays_path)
 
     # Construct model
     model = HierarchicalModel(data=(x, y, meals), T=args.treatment_effect_time,
@@ -59,11 +66,11 @@ def modelling(df_train, df_test, args):
     model = train(model)
 
     # Predict for training data and receive metrics
-    metrics_train = {'RMSE': [], 'M2': [], "MAE" : [], "NLL":[]}
+    metrics_train = {'RMSE': [], 'M2': [], "MAE": [], "NLL": []}
     metrics_train = predict(model, args, ids, metrics_train, data=(x, y, meals), time='train')
 
     # Predict for testing data and receive metrics
-    metrics_test = {'RMSE': [], 'M2': [], "MAE" : [], "NLL":[]}
+    metrics_test = {'RMSE': [], 'M2': [], "MAE": [], "NLL": []}
     metrics_test = predict(model, args, ids, metrics_test, data=(x_test, y_test, meals_test), time='test')
 
     # Save the result metrics
@@ -83,7 +90,11 @@ def modelling(df_train, df_test, args):
     predict_meal(model, args, ids, metrics_test, data=(x_test_meal, meals_test_meal_same), time='test', order='same')
     predict_meal(model, args, ids, metrics_test, data=(x_test_meal, meals_test_meal_reverse), time='test',
                  order='reverse')
-    predict_meal_severalsetups(model, args, ids, data=(x_test_meal, meals_test_meal,meals_test_meal_same,meals_test_meal_reverse))
+    predict_meal_severalsetups(model, args, ids,
+                               data=(x_test_meal, meals_test_meal, meals_test_meal_same, meals_test_meal_reverse))
+
+    if args.data == 'real':
+        patients_data_arrays_onemeal(x_test_meal, meals_test_meal, ids, args.original_arrays_path)
 
 
 def train(model):
@@ -126,10 +137,9 @@ if __name__ == "__main__":
         # Select ids
         ids = ['31_2', '12_2', '32_2', '46_2', '29_2', '57_2', '23_2', '9_2', '28_2', '76_1', '65_1', '60_1']
         # ids = ['46_2','12_2','23_2','29_2','28_2']
-        # ids = ['12_2', '29_2', '28_2']
+        #ids = ['12_2', '29_2', '28_2']
         df_train = df_train[df_train['id'].isin(ids)]
         df_test = df_test[df_test['id'].isin(ids)]
-
 
     # Modelling (Train hierarchical GP model and make predictions on glucose data)
     modelling(df_train, df_test, args)

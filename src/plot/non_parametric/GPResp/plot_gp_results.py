@@ -31,8 +31,11 @@ def plot_predictions(data, args, ids, f_means, f_vars, metrics, vars_learnt, tim
     offset = 0
     x, y, meals = data
 
-    path = args.results_data + '/'
+    path = args.results_data
     os.makedirs(path, exist_ok=True)
+
+    path_arrays = args.created_arrays_path
+    os.makedirs(path_arrays, exist_ok=True)
 
     for i, _ in enumerate(x):
         glucose_len = x[i].shape[0]
@@ -58,6 +61,12 @@ def plot_predictions(data, args, ids, f_means, f_vars, metrics, vars_learnt, tim
         plot_patient_predictions(ids[i], rmse, x[i], y[i], meals[i], f_means_i, f_vars_i,
                                  ['Baseline', 'Carbs', 'Fat', 'Fitted glucose'],
                                  ['grey', 'darkmagenta', 'orange', 'royalblue'], path, time, args, plot_var=plot_var)
+
+        # Save arrays with results data
+        file = path_arrays + ids[i] + '_' + time + '.npz'
+        np.savez(file, baseline=f_means_i[0], carbs=f_means_i[1], fat=f_means_i[2], fitted_glucose=f_means_i[3],
+                 baseline_var=f_vars_i[0], carbs_var=f_vars_i[1], fat_var=f_vars_i[2], fitted_glucose_var=f_vars_i[3])
+
         offset += glucose_len
 
     return metrics

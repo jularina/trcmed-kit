@@ -1,5 +1,5 @@
 import numpy as np
-import pandas as pd
+import os
 
 
 def arrays_preparation(df):
@@ -15,9 +15,9 @@ def arrays_preparation(df):
         y_p = df_patient_glucose['y'].values.reshape(-1, 1)
         meals_p = df_patient_meals[['t', 'CARBS', 'FAT']].values.reshape(-1, 3).astype(float)
         meals_p = remove_treatment_wo_effect(x_p, meals_p)
-        #meals_p = meals_p[meals_p[:, 1] > 5.0]
-        #meals_p[:,1] = np.log(meals_p[:,1])
-        #meals_p[:,2] = np.log(meals_p[:,2])
+        # meals_p = meals_p[meals_p[:, 1] > 5.0]
+        # meals_p[:,1] = np.log(meals_p[:,1])
+        # meals_p[:,2] = np.log(meals_p[:,2])
 
         x.append(x_p)
         y.append(y_p)
@@ -25,13 +25,14 @@ def arrays_preparation(df):
 
     return x, y, meals, patients, P
 
+
 def create_meal_prediction(m, P):
     x_agg, meals_agg, meals_agg_same, meals_agg_reverse = [], [], [], []
-    x_p = np.linspace(0,3.0,200).reshape(-1,1)
+    x_p = np.linspace(0, 3.0, 200).reshape(-1, 1)
     for p in range(P):
-        carbs_av, fat_av = np.average(m[p][:,1]), np.average(m[p][:,2])
-        meals_p = np.array([0.0, carbs_av + 4, fat_av]).reshape(1,-1)
-        meals_p_same = np.array([0.0, (carbs_av+4+fat_av)/2, (carbs_av+4+fat_av)/2]).reshape(1, -1)
+        carbs_av, fat_av = np.average(m[p][:, 1]), np.average(m[p][:, 2])
+        meals_p = np.array([0.0, carbs_av + 4, fat_av]).reshape(1, -1)
+        meals_p_same = np.array([0.0, (carbs_av + 4 + fat_av) / 2, (carbs_av + 4 + fat_av) / 2]).reshape(1, -1)
         meals_p_reverse = np.array([0.0, fat_av, carbs_av + 4]).reshape(1, -1)
         x_agg.append(x_p)
         meals_agg.append(meals_p)
@@ -78,8 +79,8 @@ def times_correction(df, df_corr, df_test=None, args=None):
 
         for p in range(P):
             t_corr_train.extend(t_corr[:M[p]])
-            t_corr_test.extend(t_corr[M[p]:M_test[p]+M[p]])
-            t_corr = t_corr[M_test[p]+M[p]:]
+            t_corr_test.extend(t_corr[M[p]:M_test[p] + M[p]])
+            t_corr = t_corr[M_test[p] + M[p]:]
 
         # Only train
         j = 0
@@ -98,3 +99,17 @@ def times_correction(df, df_corr, df_test=None, args=None):
         df_test.sort_values(by=['id', 't'], inplace=True)
 
         return df, df_test
+
+
+def patients_data_arrays(x, y, meals, x_test, y_test, meals_test, patients, path):
+    os.makedirs(path, exist_ok=True)
+    for i, p in enumerate(patients):
+        file = path + p + '.npz'
+        np.savez(file, x=x[i], y=y[i], meals=meals[i], x_test=x_test[i], y_test=y_test[i], meals_test=meals_test[i])
+
+def patients_data_arrays_onemeal(x_test, y_test, meals_test, patients, path):
+    os.makedirs(path, exist_ok=True)
+    for i, p in enumerate(patients):
+        file = path + p + '_' + 'onemeal.npz'
+        np.savez(file, x_test_meal=x_test[i],  meals_test_meal=meals_test[i])
+

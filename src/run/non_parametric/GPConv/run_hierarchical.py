@@ -31,6 +31,10 @@ parser.add_argument('--meal_type', type=str, default='carbs',
                     help="Type of meal.")
 parser.add_argument('--results_data_meal', type=str, default='./data/real/results_data/non_parametric/GPConv/single_meal/',
                     help="Path to save results data.")
+parser.add_argument('--original_arrays_path', type=str, default='./data/real/processed_data/patients_arrays/',
+                    help="Path to numpy arrays with patients data.")
+parser.add_argument('--created_arrays_path', type=str, default='./data/real/results_data/non_parametric/GPConv/patients_arrays/',
+                    help="Path to numpy arrays with patients data.")
 
 def modelling(df_train, df_test, args):
     """General function for creation of model, making predictions.
