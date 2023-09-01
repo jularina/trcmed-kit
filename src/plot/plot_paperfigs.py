@@ -183,28 +183,28 @@ def figure_7(times, obs, meals, cheng, hizli, gpresp, gplfm, gpconv, path):
     gplfm_glucose = gplfm['fitted_glucose']
 
 
-    f, (a0, a1, a2) = plt.subplots(2, 1, figsize=(8.0, 2.0), height_ratios=[3, 1], dpi=300, sharex=True)
+    f, (a0, a1) = plt.subplots(2, 1, figsize=(8.0, 4.0), height_ratios=[3, 1], dpi=300, sharex=True)
     plt.xlim(48.0, times.max())
     f.tight_layout()
 
     a0.plot(times, obs, 'x', ms=7, alpha=0.65, label='true observations', c='grey')
-    a0.plot(times, cheng_glucose, color='grey', lw=2.0, label='Cheng et al.', linestyle='solid')
-    a0.plot(times, hizli_glucose, color='grey', lw=2.0, label='Hizli et al.', linestyle='solid')
-    a0.plot(times, gpresp_glucose, color='grey', lw=2.0, label='GP-Resp', linestyle='solid')
-    a0.plot(times, gplfm_glucose, color='dodgerblue', lw=2.0, label='GP-LFM', linestyle='solid')
+    a0.plot(times, cheng_glucose, color='yellow', lw=2.0, label='Cheng et al.', linestyle='solid')
+    a0.plot(times, hizli_glucose, color='red', lw=2.0, label='Hizli et al.', linestyle='solid')
+    a0.plot(times, gpresp_glucose, color='green', lw=2.0, label='GP-Resp', linestyle='solid')
+    a0.plot(times, gplfm_glucose, color='lightblue', lw=2.0, label='GP-LFM', linestyle='solid')
     a0.plot(times, gpconv_glucose, color='royalblue', lw=2.0, label='GP-Conv', linestyle='solid')
     a0.legend(loc='upper right', fontsize=10)
     a0.set(ylabel="Glucose (mmol/l)")
 
 
-    a2.bar(meals[:, 0], meals[:, 1], color='darkmagenta', width=0.3, label="Carbs")
-    a2.bar(meals[:, 0], meals[:, 2], bottom=meals[:, 1], color='orange', width=0.3, label='Fat')
-    a2.set(xlabel="Time (hours)", ylabel="Stacked \n meals (g)")
-    a2.grid(which='major', color='#DDDDDD', linewidth=0.8)
-    a2.legend(loc='upper right', fontsize=8)
+    a1.bar(meals[:, 0], meals[:, 1], color='darkmagenta', width=0.3, label="Carbs")
+    a1.bar(meals[:, 0], meals[:, 2], bottom=meals[:, 1], color='orange', width=0.3, label='Fat')
+    a1.set(xlabel="Time (hours)", ylabel="Stacked \n meals (g)")
+    a1.grid(which='major', color='#DDDDDD', linewidth=0.8)
+    a1.legend(loc='upper right', fontsize=8)
 
     os.makedirs(path, exist_ok=True)
-    plt.savefig(path + 'figure_7_p29.pdf', bbox_inches="tight")
+    plt.savefig(path + 'figure_7_p57.pdf', bbox_inches="tight")
     plt.close()
 
 
@@ -240,12 +240,12 @@ if __name__ == "__main__":
     figure_4b(times, meals, gpconv_data, gplfm_data, path_save)
 
     # Plot Figure 7
-    path_original = './data/real/processed_data/patients_arrays/29.npz'
-    path_cheng = './data/real/results_data/non_parametric/Chengetal/patients_arrays/29_test_full.npz'
-    path_hizli = './data/real/results_data/non_parametric/Hizlietal/patients_arrays/29_test_full.npz'
-    path_gpresp = './data/real/results_data/non_parametric/GPResp/patients_arrays/29_test_full.npz'
-    path_gplfm = './data/real/results_data/non_parametric/GPLFM/patients_arrays/29_test_full.npz'
-    path_gpconv = './data/real/results_data/non_parametric/GPConv/patients_arrays/29_test_full.npz'
+    path_original = './data/real/processed_data/patients_arrays/57.npz'
+    path_cheng = './data/real/results_data/non_parametric/Chengetal/patients_arrays/57_test.npz'
+    path_hizli = './data/real/results_data/non_parametric/Hizlietal/patients_arrays/57_test.npz'
+    path_gpresp = './data/real/results_data/non_parametric/GPResp/patients_arrays/57_test.npz'
+    path_gplfm = './data/real/results_data/non_parametric/GPLFM/patients_arrays/57_test_full.npz'
+    path_gpconv = './data/real/results_data/non_parametric/GPConv/patients_arrays/57_test_full.npz'
     path_save = './data/real/results_data/non_parametric/paper_figures/'
 
     cheng_data = np.load(path_cheng)
