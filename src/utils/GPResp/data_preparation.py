@@ -28,7 +28,7 @@ def arrays_preparation(df):
 
 def create_meal_prediction(m, P):
     x_agg, meals_agg, meals_agg_same, meals_agg_reverse = [], [], [], []
-    x_p = np.linspace(0, 3.0, 200).reshape(-1, 1)
+    x_p = np.linspace(0, 3.0, 300).reshape(-1, 1)
     for p in range(P):
         carbs_av, fat_av = np.average(m[p][:, 1]), np.average(m[p][:, 2])
         meals_p = np.array([0.0, carbs_av + 4, fat_av]).reshape(1, -1)
@@ -107,7 +107,7 @@ def patients_data_arrays(x, y, meals, x_test, y_test, meals_test, patients, path
         file = path + p + '.npz'
         np.savez(file, x=x[i], y=y[i], meals=meals[i], x_test=x_test[i], y_test=y_test[i], meals_test=meals_test[i])
 
-def patients_data_arrays_onemeal(x_test, y_test, meals_test, patients, path):
+def patients_data_arrays_onemeal(x_test, meals_test, patients, path):
     os.makedirs(path, exist_ok=True)
     for i, p in enumerate(patients):
         file = path + p + '_' + 'onemeal.npz'

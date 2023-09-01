@@ -340,8 +340,8 @@ def plot_predictions_conv(data, args, ids, f_means, f_vars, time='train', full=T
 
             # Save arrays with results data
             file = path_arrays + ids[i] + '_' + time + '_'+'onemeal.npz'
-            np.savez(file, baseline=f_means_i[0], fitted_glucose=f_means_i[1], fitted_glucose_wofat=f_means_i[2], glucose=f_means_i[3],glucose_wofat=f_means_i[4],
-                     baseline_var=f_vars_i[0], fitted_glucose_var=f_vars_i[1], fitted_glucose_wofat_var=f_vars_i[2], glucose_var=f_vars_i[3],glucose_wofat_var=f_vars_i[4])
+            np.savez(file, baseline=f_means_i[0], fitted_glucose=f_means_i[1], fitted_glucose_wofat=f_means_i[2], glucose=f_means_i[4],glucose_wofat=f_means_i[3],
+                     baseline_var=f_vars_i[0], fitted_glucose_var=f_vars_i[1], fitted_glucose_wofat_var=f_vars_i[2], glucose_var=f_vars_i[4],glucose_wofat_var=f_vars_i[3])
 
         offset += glucose_len
 

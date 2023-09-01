@@ -39,6 +39,7 @@ def create_meal_prediction(m, P):
     x_p = np.linspace(0,3.0,300).reshape(-1,1)
     for p in range(P):
         carbs_av, fat_av = np.average(m[p][:,1]), np.average(m[p][:,2])
+        carbs_av += 4.0
         meals_p = np.array([0.0, carbs_av, fat_av]).reshape(1,-1)
         x_agg.append(x_p)
         meals_agg.append(meals_p)
