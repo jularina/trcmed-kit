@@ -15,15 +15,15 @@ warnings.filterwarnings("ignore")
 
 parser = argparse.ArgumentParser('Plotting results from stan model.')
 parser.add_argument('--tasks', type=int, default=1, help="Number of times the model has been run in cluster.")
-parser.add_argument('--results_data', type=str, default='./data/real/results_data/parametric/PIDR/',
+parser.add_argument('--results_data', type=str, default='./data/real/results_data/parametric/Zhangetal/',
                     help="Folder for stan results storage.")
 parser.add_argument('--processed_data', type=str, default='./data/real/processed_data/',
                     help="Path to save processed data.")
 parser.add_argument('--period', type=str, default='operation',
                     help="Time period to be considered.")
-parser.add_argument('--model', type=int, default=3, help="Index of running model.")
+parser.add_argument('--model', type=int, default=1, help="Index of running model.")
 parser.add_argument('--modelname', type=str, default='P-IDR', help="Index of running model.")
-parser.add_argument('--modelstr', type=str, default='model3',
+parser.add_argument('--modelstr', type=str, default='model1',
                     help="Model name.")
 
 
@@ -300,6 +300,8 @@ def analyse_test_results(path, P, patients, df_sliced_test, trend_p, N_test, M_t
     Returns:
     metrics_test (dict): Dictionary to store testing metrics
    """
+    vars_learnt = [0.39, 0.53, 0.33, 0.28, 0.33, 0.55, 0.43, 0.39, 0.48, 0.30, 0.50, 0.31]
+    vars_learnt = [0.48, 0.52, 0.36, 0.28, 0.33, 0.59, 0.43, 0.41, 0.49, 0.33, 0.49, 0.30] # Zhange et al
     metrics_test = {'RMSE': [], 'M2': [], "MAE" : [], "NLL":[]}
     N_max_test, M_max_test = max(N_test), max(M_test)
 
@@ -337,7 +339,7 @@ def analyse_test_results(path, P, patients, df_sliced_test, trend_p, N_test, M_t
             M1 = np.var(trend) / np.var(df_ys['y'])
             M2 = np.var(overall_glucose) / np.var(df_ys['y']) - M1
             M5 = abs(np.var(np.array(meals1) + np.array(meals2)) - np.var(df_ys['y']))
-            nll = 0.5 * (np.log(2.0 * np.pi) + np.log(0.58) + ((np.array(overall_glucose) - df_ys['y']) ** 2) / 0.58)
+            nll = 0.5 * (np.log(2.0 * np.pi) + np.log(vars_learnt[idx]) + ((np.array(overall_glucose) - df_ys['y']) ** 2) / vars_learnt[idx])
             nll = np.mean(nll)
 
             # Confidence interval
