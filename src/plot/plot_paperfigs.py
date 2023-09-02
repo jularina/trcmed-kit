@@ -123,7 +123,7 @@ def figure_4b(times, meals, gpconv, gplfm, path):
     a0.set_ylim(0,50)
     a0.set_title('GP-Conv')
     a01 = a0.twinx()
-    a01.plot(times, gpconv_wofat, color='dodgerblue', lw=2.0, label='response without fat', linestyle='solid')
+    a01.plot(times, gpconv_wofat, color='lightblue', lw=3.0, label='response without fat', linestyle='solid')
     a01.fill_between(times[:, 0],
         gpconv_wofat[:, 0] - 1.96 * np.sqrt(gpconv_wofat_var[:, 0]),
         gpconv_wofat[:, 0] + 1.96 * np.sqrt(gpconv_wofat_var[:, 0]),
