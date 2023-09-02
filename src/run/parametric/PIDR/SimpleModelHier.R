@@ -38,7 +38,7 @@ fit_obj = stan(file = "./src/models/parametric/PIDR/SimpleModelHier.stan",
                data = data, iter = its, warmup=its/2, chains = 2, cores=4,
                init = list(list(beta1 = 0.07, beta1_p = rep(0.07,P), beta2 = 0.07, beta2_p = rep(0.07,P), tx_star = tx, alpha1 = 0.35, alpha1_p = rep(0.35,P), coeff_alpha2 = 1.15, coeff_alpha2_p = rep(1.15,P), sig_y=rep(0.58,P), sig_t= 0.516 ),
                            list(beta1 = 0.08, beta1_p = rep(0.08,P), beta2 = 0.07, beta2_p = rep(0.07,P), tx_star = tx+0.033, alpha1 = 0.333, alpha1_p = rep(0.333,P), coeff_alpha2 = 1.1, coeff_alpha2_p = rep(1.1,P), sig_y=rep(0.6,P), sig_t= 0.566 )),
-               pars = c('resp_sum', 'resp_sum1','resp_sum2','log_lik','alpha1_p','coeff_alpha2_p','beta1_p','beta2_p'), include=TRUE, save_warmup=FALSE)
+               pars = c('resp_sum', 'resp_sum1','resp_sum2','log_lik','alpha1_p','coeff_alpha2_p','beta1_p','beta2_p', 'sig_y'), include=TRUE, save_warmup=FALSE)
 
 
 # Save results
@@ -161,7 +161,7 @@ write.csv(samples_y,paste('./data/results_data/parametric/PIDR/samples_y2_',task
 # write.csv(samples_y_test,'./results_data/parametric/PIDR/samples_y2_test.csv', row.names = FALSE)
 
 ## Save fitted params for each sample
-fitted_params_patients = data.frame(matrix(NA, nrow = P, ncol = 4))
+fitted_params_patients = data.frame(matrix(NA, nrow = P, ncol = 5))
 
 samples_y = numeric(P)
 for (p in 1:P) {
@@ -186,5 +186,11 @@ for (p in 1:P) {
   samples_y[p] = median(samples$beta2_p[,p])
 }
 fitted_params_patients[4]=samples_y
+
+samples_y = numeric(P)
+for (p in 1:P) {
+  samples_y[p] = median(samples$sig_y[,p])
+}
+fitted_params_patients[5]=samples_y
 
 write.csv(fitted_params_patients,paste('./data/results_data/parametric/PIDR/fitted_params_patients_',task,'.csv', sep=''), row.names = FALSE)
