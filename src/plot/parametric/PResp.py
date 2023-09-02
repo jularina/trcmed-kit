@@ -194,6 +194,7 @@ def analyse_test_results(path, P, patients, df_sliced_test, trend_p, N_test, M_t
     Returns:
     metrics_test (dict): Dictionary to store testing metrics
    """
+    vars_learnt = [0.4, 0.49, 0.31, 0.29, 0.26, 0.51, 0.44, 0.38, 0.49, 0.30, 0.45, 0.30]
     metrics_test = {'RMSE': [], 'M2': [], "MAE" : [], "NLL":[]}
     N_max_test, M_max_test = max(N_test), max(M_test)
 
@@ -231,7 +232,7 @@ def analyse_test_results(path, P, patients, df_sliced_test, trend_p, N_test, M_t
             M1 = np.var(trend) / np.var(df_ys['y'])
             M2 = np.var(overall_glucose) / np.var(df_ys['y']) - M1
             M5 = abs(np.var(np.array(meals1) + np.array(meals2)) - np.var(df_ys['y']))
-            nll = 0.5 * (np.log(2.0 * np.pi) + np.log(0.58) + ((np.array(overall_glucose) - df_ys['y']) ** 2) / 0.58)
+            nll = 0.5 * (np.log(2.0 * np.pi) + np.log(vars_learnt[idx]) + ((np.array(overall_glucose) - df_ys['y']) ** 2) / vars_learnt[idx])
             nll = np.mean(nll)
 
             # Confidence interval
