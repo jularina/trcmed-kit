@@ -38,7 +38,7 @@ fit_obj = stan(file = "./src/models/parametric/PResp/SimpleModelHier.stan",
                data = data, iter = its, warmup=its/2, chains = 2, cores=8,
                init = list(list(beta1 = 0.07, beta1_p = rep(0.07,P), beta2 = 0.07, beta2_p = rep(0.07,P), tx_star = tx, alpha1 = 0.35, alpha1_p = rep(0.35,P), alpha2 = 0.433, alpha2_p = rep(0.433,P), sig_y=rep(0.58,P), sig_t= 0.516 ),
                            list(beta1 = 0.08, beta1_p = rep(0.08,P), beta2 = 0.07, beta2_p = rep(0.07,P), tx_star = tx+0.033, alpha1 = 0.333, alpha1_p = rep(0.333,P), alpha2 = 0.416, alpha2_p = rep(0.416,P), sig_y=rep(0.6,P), sig_t= 0.566 )),
-               pars = c('resp_sum', 'resp_sum1','resp_sum2','log_lik','alpha1_p','alpha2_p','beta1_p','beta2_p', 'sig_y'), include=TRUE, save_warmup=FALSE)
+               pars = c('resp_sum', 'resp_sum1','resp_sum2','log_lik','alpha1_p','alpha2_p','beta1_p','beta2_p', 'tx_star', 'sig_y'), include=TRUE, save_warmup=FALSE)
 
 
 # Save results
@@ -88,6 +88,27 @@ dev.off()
 png(paste('./data/results_data/parametric/PResp/hist_beta2_p_',task,'.png', sep=''))
 plot(fit_obj, show_density = TRUE, pars = c("beta2_p"), ci_level = 0.95, fill_color = "blue")
 dev.off()
+
+
+# Time corrections
+samples_y = data.frame(matrix(0.0,nrow = P,ncol = M_max))
+for (p in 1:P) {
+  for (m in 1:M[p]) {
+    samples_y[p,m] = mean(samples$tx_star[,Mcumsum[p]+m])
+  }
+}
+write.csv(samples_y,paste('./data/results_data/parametric/PResp/time_corrections.csv', sep=''), row.names = FALSE)
+
+samples_y = data.frame(matrix(0.0,nrow = P,ncol = M_max))
+for (p in 1:P) {
+  for (m in 1:M[p]) {
+    samples_y[p,m] = tx[Mcumsum[p]+m]
+  }
+}
+write.csv(samples_y,paste('./data/results_data/parametric/PResp/true_times.csv', sep=''), row.names = FALSE)
+
+
+
 # 
 # pdf('./results_data/hist_sig_y.pdf')
 # plot(fit_obj, show_density = TRUE, pars = c("sig_y"), ci_level = 0.95, fill_color = "cornflowerblue")
