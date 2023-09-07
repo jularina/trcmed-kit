@@ -107,9 +107,35 @@ def patients_data_arrays(x, y, meals, x_test, y_test, meals_test, patients, path
         file = path + p + '.npz'
         np.savez(file, x=x[i], y=y[i], meals=meals[i], x_test=x_test[i], y_test=y_test[i], meals_test=meals_test[i])
 
+
 def patients_data_arrays_onemeal(x_test, meals_test, patients, path):
     os.makedirs(path, exist_ok=True)
     for i, p in enumerate(patients):
         file = path + p + '_' + 'onemeal.npz'
-        np.savez(file, x_test_meal=x_test[i],  meals_test_meal=meals_test[i])
+        np.savez(file, x_test_meal=x_test[i], meals_test_meal=meals_test[i])
 
+
+def make_folds(x, y, meals, P):
+    x_folded, y_folded, meals_folded = [], [], []
+    for p in range(P):
+        x_split = np.array_split(np.array(x[p]), 4)
+        y_split = np.array_split(np.array(y[p]), 4)
+
+        cut_times = [x_split[i][-1] for i in range(4)]
+        meals_folded_patient = [np.empty(shape=(1,3)) for i in range(4)]
+        fold = 0
+        for i in range(len(meals[p])):
+            if meals[p][i][0] <= cut_times[0]:
+                meals_folded_patient[fold] = np.append(meals_folded_patient[fold], [list(meals[p][i])], axis=0)
+            else:
+                meals_folded_patient[fold] = np.delete(meals_folded_patient[fold], 0, 0)
+                fold += 1
+                meals_folded_patient[fold] = np.append(meals_folded_patient[fold], [list(meals[p][i])], axis=0)
+                cut_times = cut_times[1:]
+
+        x_folded.append(x_split)
+        y_folded.append(y_split)
+        meals_folded_patient[fold] = np.delete(meals_folded_patient[fold], 0, 0)
+        meals_folded.append(meals_folded_patient)
+
+    return x_folded, y_folded, meals_folded

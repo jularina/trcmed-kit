@@ -4,7 +4,7 @@ import pandas as pd
 import argparse
 import warnings
 from src.utils.GPResp.data_preparation import arrays_preparation, times_correction, create_meal_prediction, \
-    patients_data_arrays, patients_data_arrays_onemeal
+    patients_data_arrays, patients_data_arrays_onemeal, make_folds
 from src.utils.GPResp.predict import predict, predict_meal, predict_meal_severalsetups
 from src.models.non_parametric.GPResp.model_hierarchical import HierarchicalModel
 from src.models.non_parametric.GPResp.kernels import get_baseline_kernel, get_treatment_time_meal1_kernel, \
@@ -36,7 +36,7 @@ parser.add_argument('--original_arrays_path', type=str, default='./data/real/pro
                     help="Path to numpy arrays with patients data.")
 parser.add_argument('--created_arrays_path', type=str, default='./data/real/results_data/non_parametric/GPResp/patients_arrays/',
                     help="Path to numpy arrays with patients data.")
-parser.add_argument('--cross_val', type=bool, default=False,
+parser.add_argument('--cross_val', type=bool, default=True,
                     help="Usage of cross-validation.")
 
 def modelling(df_train, df_test, args):
@@ -58,20 +58,17 @@ def modelling(df_train, df_test, args):
         params = [treatment1_base_kernels_v, treatment1_base_kernels_l, treatment2_base_kernels_v, treatment2_base_kernels_l]
 
         for element in itertools.product(*params):
-            indices_train = [[0,1,2,3,4,5,6,7,8],[0,1,2,3,4,5,9,10,11],[0,1,2,6,7,8,9,10,11],[3,4,5,6,7,8,9,10,11]]
-            indices_val = [[9,10,11],[6,7,8],[3,4,5],[0,1,2]]
             metrics_test = {'RMSE': [], 'M2': [], "MAE": [], "NLL": []}
+            x_folded, y_folded, meals_folded = make_folds(x,y,meals,P)
 
             for i in range(4):
-                idx_train, idx_val = indices_train[i], indices_val[i]
-                patients_train = [patients[i] for i in idx_train]
-                P_train = len(patients_train)
-                x_train, y_train, meals_train = [x[i] for i in idx_train], [y[i] for i in idx_train], [meals[i] for i in idx_train]
-                x_val, y_val, meals_val = [x[i] for i in idx_val], [y[i] for i in idx_val], [meals[i] for i in idx_val]
+                x_train, y_train = [x_folded[p][:i]+x_folded[p][i+1:] for p in range(P)], [y_folded[p][:i]+y_folded[p][i+1:] for p in range(P)]
+                meals_train = [np.concatenate(meals_folded[p].pop(i), axis=0) for p in range(P)]
+                x_val, y_val, meals_val = [x_folded[p][i] for p in range(P)], [y_folded[p][i] for p in range(P)], [meals_folded[p][i] for p in range(P)]
 
                 # Construct model
                 model = HierarchicalModel(data=(x_train, y_train, meals_train), T=args.treatment_effect_time,
-                                          baseline_kernels=[get_baseline_kernel() for _ in range(P_train)],
+                                          baseline_kernels=[get_baseline_kernel() for _ in range(P)],
                                           treatment_base_kernels=[get_treatment_time_meal1_kernel(v=element[0],l=element[1]),
                                                                   get_treatment_time_meal2_kernel(v=element[2],l=element[3])],
                                           mean_functions=[gpf.mean_functions.Zero()
