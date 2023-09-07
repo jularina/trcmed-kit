@@ -84,7 +84,8 @@ class HierarchicalModel(gpf.models.GPR):
        """
         x_lengths = [tf.shape(xi)[0] for xi in x]
         x_flat = tf.cast(tf.concat(x, axis=0), tf.float64)
-        intervals = tf.cast(tf.stack([n * self.separating_interval for n in range(self.N)]), tf.float64)
+        Ns = len(x)
+        intervals = tf.cast(tf.stack([n * self.separating_interval for n in range(Ns)]), tf.float64)
         x_sep = x_flat + tf.reshape(tf.repeat(intervals, x_lengths),
                                     (-1, 1))  # Concatenate glucose times for all patients
 

@@ -10,6 +10,7 @@ from src.models.non_parametric.GPResp.model_hierarchical import HierarchicalMode
 from src.models.non_parametric.GPResp.kernels import get_baseline_kernel, get_treatment_time_meal1_kernel, \
     get_treatment_time_meal2_kernel, get_treatment_time_meal1_kernel_lfm, get_treatment_time_meal2_kernel_lfm
 import gpflow as gpf
+import itertools
 
 warnings.filterwarnings("ignore")
 
@@ -35,6 +36,8 @@ parser.add_argument('--original_arrays_path', type=str, default='./data/real/pro
                     help="Path to numpy arrays with patients data.")
 parser.add_argument('--created_arrays_path', type=str, default='./data/real/results_data/non_parametric/GPResp/patients_arrays/',
                     help="Path to numpy arrays with patients data.")
+parser.add_argument('--cross_val', type=bool, default=False,
+                    help="Usage of cross-validation.")
 
 def modelling(df_train, df_test, args):
     """General function for creation of model, making predictions.
@@ -48,53 +51,97 @@ def modelling(df_train, df_test, args):
     ids = [id.partition('_')[0] for id in patients]
     x_test, y_test, meals_test, _, _ = arrays_preparation(df_test)
 
-    if args.data == 'real':
-        patients_data_arrays(x, y, meals, x_test, y_test, meals_test, ids, args.original_arrays_path)
+    # If we want to make cross-validation (4 folds with 3 patients 2-day data in each fold)
+    if args.cross_val:
+        treatment1_base_kernels_v, treatment1_base_kernels_l = [0.8,1.0,1.2], [0.25,0.3,0.35]
+        treatment2_base_kernels_v, treatment2_base_kernels_l = [0.07,0.1,0.15], [0.7,0.8,0.85]
+        params = [treatment1_base_kernels_v, treatment1_base_kernels_l, treatment2_base_kernels_v, treatment2_base_kernels_l]
 
-    # Construct model
-    model = HierarchicalModel(data=(x, y, meals), T=args.treatment_effect_time,
-                              baseline_kernels=[get_baseline_kernel() for _ in range(P)],
-                              treatment_base_kernels=[get_treatment_time_meal1_kernel(),
-                                                      get_treatment_time_meal2_kernel()],
-                              mean_functions=[gpf.mean_functions.Zero()
-                                              for _ in range(P)],
-                              noise_variance=args.noise_var,
-                              separating_interval=200,
-                              train_noise=True)
+        for element in itertools.product(*params):
+            indices_train = [[0,1,2,3,4,5,6,7,8],[0,1,2,3,4,5,9,10,11],[0,1,2,6,7,8,9,10,11],[3,4,5,6,7,8,9,10,11]]
+            indices_val = [[9,10,11],[6,7,8],[3,4,5],[0,1,2]]
+            metrics_test = {'RMSE': [], 'M2': [], "MAE": [], "NLL": []}
 
-    # Train model
-    model = train(model)
+            for i in range(4):
+                idx_train, idx_val = indices_train[i], indices_val[i]
+                patients_train = [patients[i] for i in idx_train]
+                P_train = len(patients_train)
+                x_train, y_train, meals_train = [x[i] for i in idx_train], [y[i] for i in idx_train], [meals[i] for i in idx_train]
+                x_val, y_val, meals_val = [x[i] for i in idx_val], [y[i] for i in idx_val], [meals[i] for i in idx_val]
 
-    # Predict for training data and receive metrics
-    metrics_train = {'RMSE': [], 'M2': [], "MAE": [], "NLL": []}
-    metrics_train = predict(model, args, ids, metrics_train, data=(x, y, meals), time='train')
+                # Construct model
+                model = HierarchicalModel(data=(x_train, y_train, meals_train), T=args.treatment_effect_time,
+                                          baseline_kernels=[get_baseline_kernel() for _ in range(P_train)],
+                                          treatment_base_kernels=[get_treatment_time_meal1_kernel(v=element[0],l=element[1]),
+                                                                  get_treatment_time_meal2_kernel(v=element[2],l=element[3])],
+                                          mean_functions=[gpf.mean_functions.Zero()
+                                                          for _ in range(P)],
+                                          noise_variance=args.noise_var,
+                                          separating_interval=200,
+                                          train_noise=True)
 
-    # Predict for testing data and receive metrics
-    metrics_test = {'RMSE': [], 'M2': [], "MAE": [], "NLL": []}
-    metrics_test = predict(model, args, ids, metrics_test, data=(x_test, y_test, meals_test), time='test')
+                # Train model
+                model = train(model)
 
-    # Save the result metrics
-    metrics_train = pd.DataFrame.from_dict(metrics_train, orient='index')
-    metrics_train['mean'] = metrics_train.mean(axis=1)
-    metrics_train['se'] = metrics_train.std(axis=1) / np.sqrt(P)
-    metrics_train.to_csv(args.results_data + "/metrics_train.csv")
+                # Predict for testing data and receive metrics
+                metrics_test = predict(model, args, ids, metrics_test, data=(x_val, y_val, meals_val), time='test')
 
-    metrics_test = pd.DataFrame.from_dict(metrics_test, orient='index')
-    metrics_test['mean'] = metrics_test.mean(axis=1)
-    metrics_test['se'] = metrics_test.std(axis=1) / np.sqrt(P)
-    metrics_test.to_csv(args.results_data + "/metrics_test.csv")
+            metrics_test = pd.DataFrame.from_dict(metrics_test, orient='index')
+            metrics_test['mean'] = metrics_test.mean(axis=1)
+            metrics_test['se'] = metrics_test.std(axis=1) / np.sqrt(metrics_test.columns-1)
+            print(element)
+            print(metrics_test)
 
-    # Predictions for one meal
-    x_test_meal, meals_test_meal, meals_test_meal_same, meals_test_meal_reverse = create_meal_prediction(meals, P)
-    predict_meal(model, args, ids, metrics_test, data=(x_test_meal, meals_test_meal), time='test', order='original')
-    predict_meal(model, args, ids, metrics_test, data=(x_test_meal, meals_test_meal_same), time='test', order='same')
-    predict_meal(model, args, ids, metrics_test, data=(x_test_meal, meals_test_meal_reverse), time='test',
-                 order='reverse')
-    predict_meal_severalsetups(model, args, ids,
-                               data=(x_test_meal, meals_test_meal, meals_test_meal_same, meals_test_meal_reverse))
 
-    if args.data == 'real':
-        patients_data_arrays_onemeal(x_test_meal, meals_test_meal, ids, args.original_arrays_path)
+    else:
+        if args.data == 'real':
+            patients_data_arrays(x, y, meals, x_test, y_test, meals_test, ids, args.original_arrays_path)
+
+        # Construct model
+        model = HierarchicalModel(data=(x, y, meals), T=args.treatment_effect_time,
+                                  baseline_kernels=[get_baseline_kernel() for _ in range(P)],
+                                  treatment_base_kernels=[get_treatment_time_meal1_kernel(v=1.0,l=0.3),
+                                                          get_treatment_time_meal2_kernel(v=0.1,l=0.8)],
+                                  mean_functions=[gpf.mean_functions.Zero()
+                                                  for _ in range(P)],
+                                  noise_variance=args.noise_var,
+                                  separating_interval=200,
+                                  train_noise=True)
+
+        # Train model
+        model = train(model)
+
+        # Predict for training data and receive metrics
+        metrics_train = {'RMSE': [], 'M2': [], "MAE": [], "NLL": []}
+        metrics_train = predict(model, args, ids, metrics_train, data=(x, y, meals), time='train')
+
+        # Predict for testing data and receive metrics
+        metrics_test = {'RMSE': [], 'M2': [], "MAE": [], "NLL": []}
+        metrics_test = predict(model, args, ids, metrics_test, data=(x_test, y_test, meals_test), time='test')
+
+        # Save the result metrics
+        metrics_train = pd.DataFrame.from_dict(metrics_train, orient='index')
+        metrics_train['mean'] = metrics_train.mean(axis=1)
+        metrics_train['se'] = metrics_train.std(axis=1) / np.sqrt(P)
+        metrics_train.to_csv(args.results_data + "/metrics_train.csv")
+
+        metrics_test = pd.DataFrame.from_dict(metrics_test, orient='index')
+        metrics_test['mean'] = metrics_test.mean(axis=1)
+        metrics_test['se'] = metrics_test.std(axis=1) / np.sqrt(P)
+        metrics_test.to_csv(args.results_data + "/metrics_test.csv")
+
+        # Predictions for one meal
+        x_test_meal, meals_test_meal, meals_test_meal_same, meals_test_meal_reverse = create_meal_prediction(meals, P)
+        predict_meal(model, args, ids, metrics_test, data=(x_test_meal, meals_test_meal), time='test', order='original')
+        predict_meal(model, args, ids, metrics_test, data=(x_test_meal, meals_test_meal_same), time='test', order='same')
+        predict_meal(model, args, ids, metrics_test, data=(x_test_meal, meals_test_meal_reverse), time='test',
+                     order='reverse')
+        predict_meal_severalsetups(model, args, ids,
+                                   data=(x_test_meal, meals_test_meal, meals_test_meal_same, meals_test_meal_reverse))
+
+        if args.data == 'real':
+            patients_data_arrays_onemeal(x_test_meal, meals_test_meal, ids, args.original_arrays_path)
+
 
 
 def train(model):

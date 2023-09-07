@@ -27,23 +27,23 @@ def get_se_kernel_periodic():
     return kb_se
 
 
-def get_treatment_time_meal1_kernel():
+def get_treatment_time_meal1_kernel(v,l):
     # kse = gpf.kernels.SquaredExponential(variance=1.6, lengthscales=0.3, active_dims=[0])
     # kse.variance.prior = tfp.distributions.HalfNormal(to_default_float(1.6))
     # kse.lengthscales.prior = tfp.distributions.Gamma(to_default_float(2.0), to_default_float(3.0))
 
-    kse = gpf.kernels.SquaredExponential(variance=1.0, lengthscales=0.3, active_dims=[0])
+    kse = gpf.kernels.SquaredExponential(variance=v, lengthscales=l, active_dims=[0])
     gpf.utilities.set_trainable(kse, False)
 
     return kse
 
 
-def get_treatment_time_meal2_kernel():
+def get_treatment_time_meal2_kernel(v,l):
     # kse = gpf.kernels.SquaredExponential(variance=1.2, lengthscales=0.6, active_dims=[0])
     # kse.variance.prior = tfp.distributions.HalfNormal(to_default_float(1.2))
     # kse.lengthscales.prior = tfp.distributions.Gamma(to_default_float(2.0), to_default_float(1.5))
 
-    kse = gpf.kernels.SquaredExponential(variance=0.1, lengthscales=0.8, active_dims=[0])
+    kse = gpf.kernels.SquaredExponential(variance=v, lengthscales=l, active_dims=[0])
     gpf.utilities.set_trainable(kse, False)
 
     return kse
