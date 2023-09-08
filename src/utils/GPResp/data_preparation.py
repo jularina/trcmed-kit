@@ -122,7 +122,7 @@ def make_folds(x, y, meals, P):
         y_split = np.array_split(np.array(y[p]), 4)
 
         cut_times = [x_split[i][-1] for i in range(4)]
-        meals_folded_patient = [np.empty(shape=(1,3)) for i in range(4)]
+        meals_folded_patient = [np.empty(shape=(1, 3)) for i in range(4)]
         fold = 0
         for i in range(len(meals[p])):
             if meals[p][i][0] <= cut_times[0]:
@@ -139,3 +139,20 @@ def make_folds(x, y, meals, P):
         meals_folded.append(meals_folded_patient)
 
     return x_folded, y_folded, meals_folded
+
+
+def combine_folds(x_folded, y_folded, meals_folded, idx, P):
+    x_train, y_train, meals_train = [], [], []
+    for p in range(P):
+        arrx, arry, arrm = [], [], []
+        for j in range(4):
+            if j not in idx:
+                arrx.append(x_folded[p][j])
+                arry.append(y_folded[p][j])
+                arrm.append(meals_folded[p][j])
+
+        x_train.append(np.vstack(arrx))
+        y_train.append(np.vstack(arry))
+        meals_train.append(np.vstack(arrm))
+
+    return x_train, y_train, meals_train
