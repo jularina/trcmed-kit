@@ -35,7 +35,7 @@ parser.add_argument('--original_arrays_path', type=str, default='./data/real/pro
                     help="Path to numpy arrays with patients data.")
 parser.add_argument('--created_arrays_path', type=str, default='./data/real/results_data/non_parametric/GPLFM/patients_arrays/',
                     help="Path to numpy arrays with patients data.")
-parser.add_argument('--cross_val', type=bool, default=False,
+parser.add_argument('--cross_val', type=bool, default=True,
                     help="Usage of cross-validation.")
 
 def modelling(df_train, df_test, args):
@@ -102,10 +102,10 @@ def modelling(df_train, df_test, args):
                 x_val, y_val, meals_val = xs_val[i], ys_val[i], mealses_val[i]
 
                 # Construct model
-                model = HierarchicalModel(data=(x, y, meals), T=args.treatment_effect_time,
+                model = HierarchicalModel(data=(x_train, y_train, meals_train), T=args.treatment_effect_time,
                                           baseline_kernels=[get_baseline_kernel() for _ in range(P)],
-                                          treatment_base_kernels=[get_treatment_time_meal1_kernel_lfm(l=element[0]),
-                                                                  get_treatment_time_meal2_kernel_lfm(l=element[1])],
+                                          treatment_base_kernels=[get_treatment_time_meal1_kernel_lfm(l=0.3),
+                                                                  get_treatment_time_meal2_kernel_lfm(l=0.8)],
                                           mean_functions=[gpf.mean_functions.Zero()
                                                           for _ in range(P)],
                                           noise_variance=args.noise_var,
@@ -130,7 +130,7 @@ def modelling(df_train, df_test, args):
             metrics_test['mean'] = metrics_test.mean(axis=1)
             metrics_test['sd'] = metrics_test.std(axis=1)
             metrics_test['se'] = metrics_test.std(axis=1) / np.sqrt(3)
-            metrics_test.to_csv(args.results_data + "/metrics_test_cv_"+str(element[0])+"_"+str(element[1])+"_"+str(element[2])+"_"+str(element[3])+".csv")
+            metrics_test.to_csv(args.results_data + "/metrics_test_cv_"+str(element[0])+"_"+str(element[1])+".csv")
             print(element)
             print(metrics_test)
 

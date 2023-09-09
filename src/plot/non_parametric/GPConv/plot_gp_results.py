@@ -54,14 +54,15 @@ def plot_predictions(data, args, ids, f_means, f_vars, metrics, vars_learnt, tim
         metrics['MAE'].append(mae_score)
         metrics['NLL'].append(nll)
 
-        if args.meal_type == 'carbs':
-            plot_patient_predictions(ids[i], rmse, x[i], y[i], meals[i], f_means_i, f_vars_i,
-                                     ['Baseline', 'Carbs',  'Fitted glucose'],
-                                     ['grey',  'darkmagenta', 'royalblue'], path, time, args, plot_var=plot_var)
-        elif args.meal_type == 'fat':
-            plot_patient_predictions(ids[i], rmse, x[i], y[i], meals[i], f_means_i, f_vars_i,
-                                     ['Baseline',  'Fat', 'Fitted glucose'],
-                                     ['grey',  'orange', 'royalblue'], path, time, args, plot_var=plot_var)
+        if args.cross_val is not True:
+            if args.meal_type == 'carbs':
+                plot_patient_predictions(ids[i], rmse, x[i], y[i], meals[i], f_means_i, f_vars_i,
+                                         ['Baseline', 'Carbs',  'Fitted glucose'],
+                                         ['grey',  'darkmagenta', 'royalblue'], path, time, args, plot_var=plot_var)
+            elif args.meal_type == 'fat':
+                plot_patient_predictions(ids[i], rmse, x[i], y[i], meals[i], f_means_i, f_vars_i,
+                                         ['Baseline',  'Fat', 'Fitted glucose'],
+                                         ['grey',  'orange', 'royalblue'], path, time, args, plot_var=plot_var)
 
         offset += glucose_len
 

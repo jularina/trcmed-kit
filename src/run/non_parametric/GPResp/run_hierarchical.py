@@ -36,7 +36,7 @@ parser.add_argument('--original_arrays_path', type=str, default='./data/real/pro
                     help="Path to numpy arrays with patients data.")
 parser.add_argument('--created_arrays_path', type=str, default='./data/real/results_data/non_parametric/GPResp/patients_arrays/',
                     help="Path to numpy arrays with patients data.")
-parser.add_argument('--cross_val', type=bool, default=False,
+parser.add_argument('--cross_val', type=bool, default=True,
                     help="Usage of cross-validation.")
 
 def modelling(df_train, df_test, args):
@@ -143,7 +143,7 @@ def modelling(df_train, df_test, args):
         # Construct model
         model = HierarchicalModel(data=(x, y, meals), T=args.treatment_effect_time,
                                   baseline_kernels=[get_baseline_kernel() for _ in range(P)],
-                                  treatment_base_kernels=[get_treatment_time_meal1_kernel(v=1.0,l=0.25),
+                                  treatment_base_kernels=[get_treatment_time_meal1_kernel(v=1.0,l=0.35),
                                                           get_treatment_time_meal2_kernel(v=0.1,l=0.7)],
                                   mean_functions=[gpf.mean_functions.Zero()
                                                   for _ in range(P)],

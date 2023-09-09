@@ -179,14 +179,14 @@ class LFMKernel(Kernel):
     """Class for the Convolution Kernel.
    """
 
-    def __init__(self, num_patients: int, meals_patient_idx, active_dims: Optional[ActiveDims]):
+    def __init__(self, num_patients: int, meals_patient_idx, l, active_dims: Optional[ActiveDims]):
         super().__init__(active_dims=active_dims)
 
         self.num_patients = num_patients
         self.m_pidx = meals_patient_idx  # Shape equals to Mi+Mj+...
         self.m_pidx2 = meals_patient_idx  # Shape equals to Mi+Mj+...
 
-        self.l = Parameter(to_default_float(0.4), transform=positive())
+        self.l = Parameter(to_default_float(l), transform=positive())
         self.l.prior = tfp.distributions.Gamma(to_default_float(2.0), to_default_float(3.0))
 
         self.beta_raw = Parameter(to_default_float(0.001) * tf.ones(num_patients, dtype=tf.float64),

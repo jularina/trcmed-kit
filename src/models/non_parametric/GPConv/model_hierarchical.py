@@ -20,7 +20,7 @@ class HierarchicalModel(gpf.models.GPR):
     train_noise (boolean): if to include train noise
    """
 
-    def __init__(self, data, T, baseline_kernels, mean_functions, noise_variance=1.0,
+    def __init__(self, data, T, baseline_kernels, mean_functions, l, noise_variance=1.0,
                  separating_interval=200.0, train_noise=True):
 
         x, y, meals = data
@@ -53,7 +53,7 @@ class HierarchicalModel(gpf.models.GPR):
         self.treatment_kernel_cor_meal1.kappa.assign(np.ones(self.treatment_kernel_cor_meal1.kappa.shape) * 1e-12)
         gpf.set_trainable(self.treatment_kernel_cor_meal1.kappa, False)
 
-        self.treatment1_base_kernel = LFMKernel(num_patients=self.N, meals_patient_idx=self.meals_patient_idx, active_dims=[0, 1, 3])
+        self.treatment1_base_kernel = LFMKernel(num_patients=self.N, meals_patient_idx=self.meals_patient_idx, l=l, active_dims=[0, 1, 3])
         gpf.set_trainable(self.treatment1_base_kernel.beta_raw, False)
         gpf.set_trainable(self.treatment1_base_kernel.alpha_raw, False)
         self.treatment_kernel = self.treatment1_base_kernel * self.treatment_kernel_cor_meal1
