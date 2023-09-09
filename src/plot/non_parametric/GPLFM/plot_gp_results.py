@@ -57,14 +57,16 @@ def plot_predictions(data, args, ids, f_means, f_vars, metrics, vars_learnt, tim
         metrics['MAE'].append(mae_score)
         metrics['NLL'].append(nll)
 
-        plot_patient_predictions(ids[i], rmse, x[i], y[i], meals[i], f_means_i, f_vars_i,
-                                 ['baseline', 'response to carbs', 'response to fat', 'Fitted glucose'],
-                                 ['grey', 'darkmagenta', 'orange', 'royalblue'], path, time, args, plot_var=plot_var)
+        if args.cross_val is not True:
 
-        # Save arrays with results data
-        file = path_arrays + ids[i] + '_' + time + '_'+'full.npz'
-        np.savez(file, baseline=f_means_i[0], carbs=f_means_i[1], fat=f_means_i[2], fitted_glucose=f_means_i[3],
-                 baseline_var=f_vars_i[0], carbs_var=f_vars_i[1], fat_var=f_vars_i[2], fitted_glucose_var=f_vars_i[3])
+            plot_patient_predictions(ids[i], rmse, x[i], y[i], meals[i], f_means_i, f_vars_i,
+                                     ['baseline', 'response to carbs', 'response to fat', 'Fitted glucose'],
+                                     ['grey', 'darkmagenta', 'orange', 'royalblue'], path, time, args, plot_var=plot_var)
+
+            # Save arrays with results data
+            file = path_arrays + ids[i] + '_' + time + '_'+'full.npz'
+            np.savez(file, baseline=f_means_i[0], carbs=f_means_i[1], fat=f_means_i[2], fitted_glucose=f_means_i[3],
+                     baseline_var=f_vars_i[0], carbs_var=f_vars_i[1], fat_var=f_vars_i[2], fitted_glucose_var=f_vars_i[3])
 
         offset += glucose_len
 

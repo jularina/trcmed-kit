@@ -54,14 +54,14 @@ def get_treatment_time_meal2_kernel():
     return kse
 
 
-def get_treatment_time_meal1_kernel_lfm():
-    klfm = LFMKernel(decay=0.9, sensitivity=1.0, lengthscales=0.3, active_dims=[0])
+def get_treatment_time_meal1_kernel_lfm(l):
+    klfm = LFMKernel(decay=0.9, sensitivity=1.0, lengthscales=l, active_dims=[0])
 
     return klfm
 
 
-def get_treatment_time_meal2_kernel_lfm():
-    klfm = LFMKernel(decay=0.9, sensitivity=1.0, lengthscales=0.8, active_dims=[0])
+def get_treatment_time_meal2_kernel_lfm(l):
+    klfm = LFMKernel(decay=0.9, sensitivity=1.0, lengthscales=l, active_dims=[0])
 
     return klfm
 
