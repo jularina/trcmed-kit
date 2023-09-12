@@ -101,6 +101,7 @@ def figure_4b(times, meals, gpconv, gplfm, path):
     plt.rcParams.update({
         "font.family": "Times New Roman",  # use serif/main font for text elements
         "font.size": "16",
+        "legend.title_fontsize": "10",
         "text.usetex": True,  # use inline math for ticks
         "pgf.rcfonts": False,  # don't setup fonts from rc parameters
         "axes.titlesize": "16",
@@ -114,46 +115,55 @@ def figure_4b(times, meals, gpconv, gplfm, path):
     gplfm_carbs_var, gplfm_fat_var = gplfm['carbs_var'], gplfm['fat_var']
 
     f, (a0, a1) = plt.subplots(2, 1, figsize=(4.0, 5.0), dpi=300, sharex=True)
-    f.text(0.0, 0.5, 'Stacked meals (g)', va='center', rotation='vertical')
-    f.text(1.0, 0.5, 'Glucose (mmol/l)', va='center', rotation='vertical')
+    f.text(0.0, 0.5, 'Meal intake (g)', va='center', rotation='vertical')
+    f.text(1.0, 0.5, 'Glucose response (mmol/l)', va='center', rotation='vertical')
     f.tight_layout()
 
-    a0.bar(meals[:, 0], meals[:, 1], color='darkmagenta', width=0.3, label="Carbs")
-    a0.bar(meals[:, 0], meals[:, 2], bottom=meals[:, 1], color='orange', width=0.3, label='Fat')
+    def plot_meal_bars(ax):
+        ax.bar(meals[:, 0], meals[:, 1], color='darkmagenta', width=0.3, label="Carbs")
+        ax.bar(meals[:, 0], meals[:, 2], bottom=meals[:, 1], color='orange', width=0.3, label='Fat')
+        ax.text(meals[:, 0], meals[:, 1]/2,             f"carbs.\n{meals[0,1]:.1f}", ha='center', va='center', rotation='vertical', fontsize=8, color='white')
+        ax.text(meals[:, 0], meals[:, 1]+meals[:, 2]/2, f"fat\n{meals[0,2]:.1f}", ha='center', va='center', rotation='vertical', fontsize=8)
+
+    plot_meal_bars(a0)
+    a0.set_xlim(-0.3, 3)
     a0.set_ylim(0,50)
-    a0.set_title('GP-Conv')
+    a0.set_title(r'$\texttt{GP-Conv}$')
+
     a01 = a0.twinx()
-    a01.plot(times, gpconv_wofat, color='lightblue', lw=3.0, label='response without fat', linestyle='solid')
-    a01.fill_between(times[:, 0],
-        gpconv_wofat[:, 0] - 1.96 * np.sqrt(gpconv_wofat_var[:, 0]),
-        gpconv_wofat[:, 0] + 1.96 * np.sqrt(gpconv_wofat_var[:, 0]),
-        color='dodgerblue',
-        alpha=0.2,
-    )
-    a01.plot(times, gpconv_wfat, color='royalblue', lw=2.0, label='response with fat', linestyle='solid')
+    a01.plot(times, gpconv_wfat, color='royalblue', lw=2.0, label='with fat', linestyle='solid')
     a01.fill_between(times[:, 0],
         gpconv_wfat[:, 0] - 1.96 * np.sqrt(gpconv_wfat_var[:, 0]),
         gpconv_wfat[:, 0] + 1.96 * np.sqrt(gpconv_wfat_var[:, 0]),
         color='royalblue',
         alpha=0.2,
     )
+    a01.plot(times, gpconv_wofat, color='lightblue', lw=2.0, label='without fat', linestyle='solid')
+    a01.fill_between(times[:, 0],
+        gpconv_wofat[:, 0] - 1.96 * np.sqrt(gpconv_wofat_var[:, 0]),
+        gpconv_wofat[:, 0] + 1.96 * np.sqrt(gpconv_wofat_var[:, 0]),
+        color='dodgerblue',
+        alpha=0.2,
+    )
     a01.set(xlabel="Time (hours)")
-    a01.legend(loc='upper right', fontsize=10)
+    a01.legend(loc='right', fontsize=10, frameon=False, title="response")
 
-    a1.bar(meals[:, 0], meals[:, 1], color='darkmagenta', width=0.3, label="Carbs")
-    a1.bar(meals[:, 0], meals[:, 2], bottom=meals[:, 1], color='orange', width=0.3, label='Fat')
+    a0.set_zorder(a01.get_zorder()+1)  # have bars (a0) on top of lines (a01)
+    a0.patch.set_visible(False)  # need to remove white background of a0
+
+    plot_meal_bars(a1)
     a1.set(xlabel="Time (hours)")
     a1.set_ylim(0,50)
-    a1.set_title('GP-LFM')
+    a1.set_title(r'$\texttt{GP-LFM}$')
     a11 = a1.twinx()
-    a11.plot(times, gplfm_carbs, color='darkmagenta', lw=2.0, label='response to carbs', linestyle='solid')
+    a11.plot(times, gplfm_carbs, color='darkmagenta', lw=2.0, label='carbohydrates', linestyle='solid')
     a11.fill_between(times[:, 0],
         gplfm_carbs[:, 0] - 1.96 * np.sqrt(gplfm_carbs_var[:, 0]),
         gplfm_carbs[:, 0] + 1.96 * np.sqrt(gplfm_carbs_var[:, 0]),
         color='darkmagenta',
         alpha=0.2,
     )
-    a11.plot(times, gplfm_fat, color='orange', lw=2.0, label='response to fat', linestyle='solid')
+    a11.plot(times, gplfm_fat, color='orange', lw=2.0, label='fat', linestyle='solid')
     a11.fill_between(times[:, 0],
         gplfm_fat[:, 0] - 1.96 * np.sqrt(gplfm_fat_var[:, 0]),
         gplfm_fat[:, 0] + 1.96 * np.sqrt(gplfm_fat_var[:, 0]),
@@ -161,7 +171,10 @@ def figure_4b(times, meals, gpconv, gplfm, path):
         alpha=0.2,
     )
     a11.set(xlabel="Time (hours)")
-    a11.legend(loc='upper right', fontsize=10)
+    a11.legend(loc='right', fontsize=10, frameon=False, title="response to")
+    
+    a1.set_zorder(a11.get_zorder()+1)  # have bars (a1) on top of lines (a11)
+    a1.patch.set_visible(False)  # need to remove white background of a1
 
     os.makedirs(path, exist_ok=True)
     plt.savefig(path + 'figure_4b.pdf', bbox_inches="tight")
