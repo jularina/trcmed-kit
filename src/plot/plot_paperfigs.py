@@ -101,7 +101,7 @@ def figure_4a(times, obs, meals, gpconv, gplfm, path):
     a2.set(xlabel="Time (hours)")#, ylabel="Meals (g)")
     a2.set_title("Meal intake", loc='left')
     #a2.grid(which='major', color='#DDDDDD', linewidth=0.8)
-    a2.legend(loc='right', fontsize=8, frameon=False)
+    a2.legend(loc='right', fontsize=10, frameon=False)
     a2.set_yticks([0, 25, 50], ["0", r"$25\,$g", r"$50\,$g"])
     despine(a2)
 
