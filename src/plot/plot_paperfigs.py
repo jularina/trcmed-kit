@@ -33,7 +33,12 @@ def figure_4a(times, obs, meals, gpconv, gplfm, path):
     def plot_trueobs(ax):
         ax.plot(times, obs, 'x', ms=7, alpha=0.65, label='true observations', c='grey')
 
+    def plot_meallines(ax):
+        for mealtime in meals[:,0]:
+            ax.axvline(mealtime, color='gray', alpha=0.3, lw=1, ls='dotted', zorder=0)
+
     plot_trueobs(a0)
+    plot_meallines(a0)
     a0.plot(times, gpconv_wfat, color='royalblue', lw=2.0, label='fit with fat', linestyle='solid', zorder=4)
     a0.fill_between(times[:, 0],
         gpconv_wfat[:, 0] - 1.96 * np.sqrt(gpconv_wfat_var[:, 0]),
@@ -62,6 +67,7 @@ def figure_4a(times, obs, meals, gpconv, gplfm, path):
     despine(a0)
 
     plot_trueobs(a1)
+    plot_meallines(a1)
     a1.plot(times, gplfm_glucose, color='royalblue', lw=2.0, label='fit (total)', linestyle='solid', zorder=4)
     a1.fill_between(times[:, 0],
         gplfm_glucose[:, 0] - 1.96 * np.sqrt(gplfm_glucose_var[:, 0]),
@@ -96,6 +102,7 @@ def figure_4a(times, obs, meals, gpconv, gplfm, path):
     a1.set_title(r'$\texttt{GP-LFM}$ fitted glucose response to carbohydrates and fat', loc='left')
     despine(a1)
 
+    plot_meallines(a2)
     a2.bar(meals[:, 0], meals[:, 2], bottom=meals[:, 1], color='orange', width=0.3, label='Fat')
     a2.bar(meals[:, 0], meals[:, 1], color='darkmagenta', width=0.3, label="Carbohydrates")
     a2.set(xlabel="Time (hours)")#, ylabel="Meals (g)")
