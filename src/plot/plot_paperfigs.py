@@ -146,7 +146,7 @@ def figure_4b(times, meals, gpconv, gplfm, path):
         alpha=0.2,
     )
     a01.set(xlabel="Time (hours)")
-    a01.legend(loc='right', fontsize=10, frameon=False, title="response")
+    a01.legend(loc='right', fontsize=10, frameon=False, title="fitted response")
 
     a0.set_zorder(a01.get_zorder()+1)  # have bars (a0) on top of lines (a01)
     a0.patch.set_visible(False)  # need to remove white background of a0
@@ -171,7 +171,7 @@ def figure_4b(times, meals, gpconv, gplfm, path):
         alpha=0.2,
     )
     a11.set(xlabel="Time (hours)")
-    a11.legend(loc='right', fontsize=10, frameon=False, title="response to")
+    a11.legend(loc='right', fontsize=10, frameon=False, title="fitted response to")
     
     a1.set_zorder(a11.get_zorder()+1)  # have bars (a1) on top of lines (a11)
     a1.patch.set_visible(False)  # need to remove white background of a1
