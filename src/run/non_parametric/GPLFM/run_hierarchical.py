@@ -35,7 +35,7 @@ parser.add_argument('--original_arrays_path', type=str, default='./data/real/pro
                     help="Path to numpy arrays with patients data.")
 parser.add_argument('--created_arrays_path', type=str, default='./data/real/results_data/non_parametric/GPLFM/patients_arrays/',
                     help="Path to numpy arrays with patients data.")
-parser.add_argument('--cross_val', type=bool, default=True,
+parser.add_argument('--cross_val', type=bool, default=False,
                     help="Usage of cross-validation.")
 
 def modelling(df_train, df_test, args):
@@ -211,9 +211,9 @@ if __name__ == "__main__":
         df_train, df_test = times_correction(df_train, time_corr_df, df_test, args)
 
         # Select ids
-        ids = ['31_2', '12_2', '32_2', '46_2', '29_2', '57_2', '23_2', '9_2', '28_2', '76_1', '65_1', '60_1']
-        # ids = ['46_2','12_2','23_2','29_2','28_2']
-        # ids = ['12_2', '29_2', '28_2']
+        # ids = ['31_2', '12_2', '32_2', '46_2', '29_2', '57_2', '23_2', '9_2', '28_2', '76_1', '65_1', '60_1']
+        ids = ['46_2','12_2','23_2','29_2','28_2']
+        #ids = ['12_2', '29_2', '28_2']
         df_train = df_train[df_train['id'].isin(ids)]
         df_test = df_test[df_test['id'].isin(ids)]
 

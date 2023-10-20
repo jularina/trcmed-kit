@@ -98,7 +98,7 @@ def plot_patient_predictions(idx, rmse, x_p, y_p, meals_p, f_means_p, f_vars_p, 
     axs[0].plot(x_p, y_p, 'x', ms=7, alpha=0.65, label='true observations', c='grey')
     axs[0].legend(loc='upper right',fontsize=8, frameon=False)
     axs[0].set(ylabel="Glucose (mmol/l)")
-    axs[0].set_ylim(4, 7)
+    axs[0].set_ylim(0, 7)
     axs[0].set_title('GP-LFM glucose response to carbs and fat')
 
     axs[1].bar(meals_p[:, 0], meals_p[:, 1], color='darkmagenta', width=0.3, label="Carbs")
@@ -287,21 +287,22 @@ def plot_latent(data, args, ids, f_means, f_vars, time='train', plot_var=True):
 def plot_patient_predictions_latent(idx, x_p, f_means_p, f_vars_p, f_labels, f_colors, f_lines, path, time='train',
                              args=None, plot_var=True):
     mpl.rcParams["figure.autolayout"] = True
-    fig, axs = plt.subplots(2, 1, figsize=(6.0, 4.0), dpi=300, sharex=True)
-    plt.xlim(x_p.min(), x_p.max())
+    fig, axs = plt.subplots(2, 1, figsize=(6.0, 4.0), dpi=300)
+    plt.xlim(48.0, 72.0)
     for fm, fv, col, lbl, ls in zip(f_means_p[:2], f_vars_p[:2], f_colors[:2], f_labels[:2], f_lines[:2]):
         plot_gp_pred(axs[0], x_p, fm, fv, color=col, label=lbl, ls = ls, plot_var=False)
 
     axs[0].legend(loc='upper right', fontsize=10)
-    axs[0].set_title('Carbs')
+    axs[0].set_title('Carbohydrate')
+    axs[0].set(xlabel="Time (hours)", ylabel="Glucose (mmol/l)")
 
     for fm, fv, col, lbl, ls in zip(f_means_p[2:], f_vars_p[2:], f_colors[2:], f_labels[2:], f_lines[2:]):
         plot_gp_pred(axs[1], x_p, fm, fv, color=col, label=lbl, ls = ls, plot_var=False)
 
     axs[1].legend(loc='upper right', fontsize=10)
-    axs[1].set(xlabel="Time (hours)")
+    axs[1].set(xlabel="Time (hours)", ylabel="Glucose (mmol/l)")
     axs[1].set_title('Fat')
-    fig.text(0.00, 0.5, 'Glucose (mmol/l)', va='center', rotation='vertical')
+    #fig.text(0.00, 0.5, 'Glucose (mmol/l)', va='center', rotation='vertical')
 
     path = path + 'id' + str(idx) + '/'
     os.makedirs(path, exist_ok=True)
