@@ -140,8 +140,8 @@ def summary_statistics(df_train, df_test):
         data.append([len(y[p]), len(meals[p]), np.median(y[p]), round(np.median(meals[p][:,1]),2), round(np.median(meals[p][:,2]),2), len(y_test[p]), len(meals_test[p]), np.median(y_test[p]), round(np.median(meals_test[p][:,1]),2), round(np.median(meals_test[p][:,2]),2)])
 
     summary_df = pd.DataFrame(data)
-    summary_df.columns = ['Glucose # train', 'Treatments # train','Glucose median train','Carbs median train', 'Fat median train', 'Glucose # test', 'Treatments # test','Glucose median test','Carbs median test', 'Fat median test']
-    summary_df.to_csv(args.processed_data + '/summary_statistics_data.csv')
+    summary_df.columns = ['glucnumtrain', 'treatnumtrain','glucmedtrain','carbsmedtrain', 'fatmedtrain', 'glucnumtest', 'treatnumtest','glucmedtest','carbsmedtest', 'fatmedtest']
+    summary_df.to_csv(args.processed_data + '/summary_statistics_data.csv', index=False)
 
 
 if __name__ == "__main__":
