@@ -45,8 +45,8 @@ def plot_original_data(df_train, df_test):
 
     fig, axs = plt.subplots(1, 3, figsize=(12.0, 3.0))
     axs[0].plot([], [], ' ', label="Glucose:")
-    sns.kdeplot(data=glucose, color="#4169E1", alpha=0.3, fill=True, label='Train', lw=0, ax=axs[0])
-    sns.kdeplot(data=glucose_test, color='#4169E1', alpha=0.7, fill=True, label='Test', lw=0, ax=axs[0])
+    sns.kdeplot(data=glucose, color="#4169E1", alpha=0.2, fill=True, label='Train', lw=0, ax=axs[0])
+    sns.kdeplot(data=glucose_test, color='#4169E1', alpha=0.6, fill=True, label='Test', lw=0, ax=axs[0])
 
     axs[1].plot([], [], ' ', label="Carbs:")
     axs[1].hist(carbs, color='darkmagenta', label='Train', alpha=0.3)
@@ -55,16 +55,7 @@ def plot_original_data(df_train, df_test):
     axs[2].plot([], [], ' ', label="Fat:")
     axs[2].hist(fat, color='orange', label='Train', alpha=0.3)
     axs[2].hist(fat_test, color='orange', label='Test', alpha=0.8)
-    # axs[2].set_title("Fat", fontsize=14)
 
-    # legend_elements = [Line2D([0], [0], color='royalblue', alpha=0.3, lw=4, label='Train glucose'),
-    #                    Line2D([0], [0], color='royalblue', alpha=0.8, lw=4, label='Test glucose'),
-    #                    Line2D([0], [0], color='darkmagenta', alpha=0.3, lw=4, label='Train carbs'),
-    #                    Line2D([0], [0], color='darkmagenta', alpha=0.8, lw=4, label='Test carbs'),
-    #                    Line2D([0], [0], color='orange', lw=4, alpha=0.3, label='Train fat'),
-    #                    Line2D([0], [0], color='orange', lw=4, alpha=0.8, label='Test fat')
-    #                    ]
-    # fig.legend(handles=legend_elements, loc='lower center', ncol=3)
     axs[0].legend(fontsize=12)
     axs[1].legend(fontsize=12)
     axs[2].legend(fontsize=12)
@@ -78,8 +69,8 @@ def plot_original_data_indiv(y, meals, y_test, meals_test, P):
     for p in range(P):
         # axs[0, p].hist(y[p], color='royalblue', alpha=0.3)
         # axs[0, p].hist(y_test[p], color='royalblue', alpha=0.8)
+        sns.kdeplot(data=y_test[p], color='royalblue', alpha=0.6, fill=True, legend=False, lw=0, ax=axs[0, p])
         sns.kdeplot(data=y[p], color='royalblue', alpha=0.3, fill=True, legend=False, lw=0, ax=axs[0, p])
-        sns.kdeplot(data=y_test[p], color='royalblue', alpha=0.7, fill=True, legend=False, lw=0, ax=axs[0, p])
         axs[0, p].set_ylabel('')
         axs[0, p].set_title("Patient {}".format(p+1), fontsize=14)
         axs[1, p].hist(meals[p][:,1], color='darkmagenta', alpha=0.3)
@@ -119,7 +110,7 @@ def plot_original_data_indiv(y, meals, y_test, meals_test, P):
             axs[2, p].xaxis.set_ticklabels([])
 
     legend_elements = [Line2D([0], [0], color='royalblue', alpha=0.3, lw=4, label='Train glucose'),
-                       Line2D([0], [0], color='royalblue', alpha=0.8, lw=4, label='Test glucose'),
+                       Line2D([0], [0], color='royalblue', alpha=0.6, lw=4, label='Test glucose'),
                        Line2D([0], [0], color='darkmagenta', alpha=0.3, lw=4, label='Train carbs'),
                        Line2D([0], [0], color='darkmagenta', alpha=0.8, lw=4, label='Test carbs'),
                        Line2D([0], [0], color='orange', lw=4, alpha=0.3, label='Train fat'),
