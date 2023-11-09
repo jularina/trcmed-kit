@@ -11,37 +11,37 @@ This approach enhances the accuracy of the modeling process and equips clinician
 
 ## Installation
 
-To work with the project just create the project from the repository.
+To start the work - just create the project from the repository.
 
-To install all the needed packages:
+To install all the needed packages run:
 ```console
 conda install --file requirements.txt
 ```
 
 ## Usage
 #### Dataset
-For that submission stage, we use the simple synthetic dataset with data for three individuals. It is stored in /trcmed-kit/data/processed_data/ folder and is divided into train and test parts.
-As the data is artificial, it may not have some mechanistic/biological tendencies underneath as opposed to the real one.
+We have:
+- simple synthetic dataset with data for 3 individuals - /trcmed-kit/data/synthetic/processed_data/.
+- real dataset with data for 12 individuals - /trcmed-kit/data/real/processed_data/.
+
 #### Parametric models
-There are two parametric models - P-Resp and P-IDR.
+There are two parametric models - P-Resp and P-IDR (written in R and inferred with Stan).
 
-Parametric models are written in R and inferred with Stan.
+The Stan code - /trcmed-kit/src/models/parametric/CHOSEN_MODEL/SimpleModelHier.stan
 
-The Stan code is specified in /trcmed-kit/src/models/parametric/CHOSEN_MODEL/SimpleModelHier.stan
+To compile and run the .stan file - /trcmed-kit/src/run/parametric/CHOSEN_MODEL/SimpleModelHier.R.
 
-To compile and run the .stan file the script from /trcmed-kit/src/run/parametric/CHOSEN_MODEL/SimpleModelHier.R is used.
-
-To work with them it is better to use HPC cluster and run
+To work with .R models it is better to use HPC cluster and run
 ```shell
 /trcmed-kit/src/run/parametric/run_parametric_triton.sh
 ```
 Inside the shell script the desired parametric model address can be chosen, as well as the output directories.
 
-After the sampling has been done and the results stored in the respective folder, the python code to plot them can be run:
+After the sampling has been done and the results stored in the respective folder, the python code to plot results:
 ```
 python /trcmed-kit/src/plot/parametric/CHOSEN_MODEL.py
 ```
-Results (plots and metrics) are stored in /trcmed-kit/data/results_data/parametric/CHOSEN_MODEL/ folder.
+Results (plots and metrics) are stored in /trcmed-kit/data/{real or synthetic}/results_data/parametric/CHOSEN_MODEL/ folder.
 
 
 #### Nonparametric models
@@ -51,4 +51,4 @@ Run nonparametric model:
 ```
 python /trcmed-kit/src/run/non_parametric/CHOSEN_MODEL/run_hierarchical.py
 ```
-Results (plots and metrics) are stored in /trcmed-kit/data/results_data/non_parametric/CHOSEN_MODEL/ folder.
+Results (plots and metrics) are stored in /trcmed-kit/data/{real or synthetic}/results_data/non_parametric/CHOSEN_MODEL/ folder.
